@@ -833,38 +833,11 @@
     </div>
 
     <script>
-        const JSONBLOB_STORAGE_KEY = 'fridge_jsonblob_id_v1';
-        let activeBlobId = '';
-
-        function getBlobId() {
-            const params = new URLSearchParams(window.location.search);
-            const fromUrl = (params.get('blob') || '').trim();
-            if (fromUrl) {
-                activeBlobId = fromUrl;
-                try { localStorage.setItem(JSONBLOB_STORAGE_KEY, fromUrl); } catch (_) {}
-                return activeBlobId;
-            }
-            if (activeBlobId) return activeBlobId;
-            try {
-                const saved = (localStorage.getItem(JSONBLOB_STORAGE_KEY) || '').trim();
-                if (saved) {
-                    activeBlobId = saved;
-                    return activeBlobId;
-                }
-            } catch (_) {}
-            return '';
-        }
-
-        function setBlobId(id) {
-            activeBlobId = String(id || '').trim();
-            if (!activeBlobId) return;
-            try { localStorage.setItem(JSONBLOB_STORAGE_KEY, activeBlobId); } catch (_) {}
-            try {
-                const url = new URL(window.location.href);
-                url.searchParams.set('blob', activeBlobId);
-                window.history.replaceState({}, '', url.toString());
-            } catch (_) {}
-        }
+        // Впиши сюда свой Fine-grained токен внутрь кавычек
+        const GITHUB_OWNER = 'neiropid';
+        const GITHUB_REPO = 'fridge';
+        const GITHUB_PATH = 'data.json';
+        const GITHUB_TOKEN = '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';
 
         const THEME_STORAGE_KEY = 'fridge_device_theme_v1';
         const CACHE_STORAGE_KEY = 'fridge_items_cache_v1';
@@ -1174,6 +1147,14 @@
             }, TOAST_DURATION_MS);
         }
 
+        function getGithubHeaders() {
+            const headers = { 'Accept': 'application/vnd.github+json' };
+            if (GITHUB_TOKEN) {
+                headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+            }
+            return headers;
+        }
+
         async function fetchItems(manual = false) {
             if (hasUnsavedChanges && !manual) return;
 
@@ -1188,19 +1169,20 @@
                 render();
             }
 
-            const blobId = getBlobId();
-            if (!blobId) {
+            if (!GITHUB_OWNER || !GITHUB_REPO) {
                 if (syncBtn) syncBtn.innerText = '🔄 Обновить';
                 return;
             }
 
             try {
-                const res = await fetch(`https://jsonblob.com/api/jsonBlob/${blobId}?t=${Date.now()}`, {
-                    headers: { 'Accept': 'application/json' },
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}?t=${Date.now()}`, {
+                    headers: getGithubHeaders(),
                     cache: 'no-store'
                 });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
+                const fileMeta = await res.json();
+                const decoded = decodeURIComponent(escape(atob(String(fileMeta.content || '').replace(/\n/g, ''))));
+                const data = JSON.parse(decoded);
                 if (!Array.isArray(data)) throw new Error('Bad JSON');
 
                 const normalized = mergeCatalogWithItems(data.map(normalizeItem));
@@ -1212,7 +1194,7 @@
                 render();
             } catch (_) {
                 if (manual) {
-                    setUnsaved(true, 'Не удалось загрузить облако — проверь сеть/VPN');
+                    setUnsaved(true, 'Не удалось прочитать data.json с GitHub');
                 }
             } finally {
                 if (syncBtn) syncBtn.innerText = '🔄 Обновить';
@@ -1499,79 +1481,56 @@
             render();
         }
 
-        async function createBlobIfNeeded(payloadArr) {
-            let blobId = getBlobId();
-            if (blobId) return blobId;
-
-            const res = await fetch('https://jsonblob.com/api/jsonBlob', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(payloadArr)
-            });
-            if (!res.ok) throw new Error(`POST ${res.status}`);
-
-            const loc = res.headers.get('Location') || res.headers.get('X-Jsonblob-Id') || '';
-            const match = loc.match(/([a-zA-Z0-9_-]{8,})$/);
-            if (match && match[1]) {
-                blobId = match[1];
-            } else {
-                try {
-                    const data = await res.json();
-                    if (data && data.id) blobId = String(data.id);
-                } catch (_) {}
-            }
-
-            if (!blobId) throw new Error('No ID');
-            setBlobId(blobId);
-            return blobId;
-        }
-
         async function saveChanges() {
             const btn = document.querySelector('.btn-confirm');
             btn.disabled = true;
             btn.innerText = 'Сохранение...';
             writeLocalCache(draftItems);
 
-            const activeOrCustom = draftItems.filter(i => i.status !== 'catalog' || Number(i.id) <= -200 || Number(i.id) > 0);
-
-            let savedOk = false;
-            for (let attempt = 0; attempt < 2; attempt++) {
-                try {
-                    const existingId = getBlobId();
-                    if (!existingId) {
-                        await createBlobIfNeeded(activeOrCustom);
-                        savedOk = true;
-                        break;
-                    }
-                    const res = await fetch(`https://jsonblob.com/api/jsonBlob/${existingId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(activeOrCustom)
-                    });
-                    if (res.ok) {
-                        savedOk = true;
-                        break;
-                    }
-                } catch (_) {}
-                await new Promise(r => setTimeout(r, 350));
+            if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
+                setUnsaved(true, 'Не вписан GITHUB_TOKEN — сохранено только локально');
+                btn.disabled = false;
+                btn.innerText = 'Сохранить';
+                return;
             }
 
-            if (savedOk) {
+            const activeOrCustom = draftItems.filter(i => i.status !== 'catalog' || Number(i.id) <= -200 || Number(i.id) > 0);
+            const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+
+            try {
+                const getRes = await fetch(`${apiUrl}?t=${Date.now()}`, {
+                    headers: getGithubHeaders(),
+                    cache: 'no-store'
+                });
+                if (!getRes.ok) throw new Error(`GET ${getRes.status}`);
+                const meta = await getRes.json();
+
+                const jsonStr = JSON.stringify(activeOrCustom);
+                const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
+
+                const putRes = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        ...getGithubHeaders(),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Update fridge data',
+                        content: base64Content,
+                        sha: meta.sha
+                    })
+                });
+                if (!putRes.ok) throw new Error(`PUT ${putRes.status}`);
+
                 originalItems = JSON.parse(JSON.stringify(draftItems));
                 clearAllToasts();
                 setUnsaved(false);
-            } else {
-                setUnsaved(true, 'В облако не ушло — проверь сеть/VPN и нажми Сохранить');
+            } catch (_) {
+                setUnsaved(true, 'В облако не ушло — проверь токен/сеть и нажми Сохранить');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Сохранить';
             }
-
-            btn.disabled = false;
-            btn.innerText = 'Сохранить';
         }
 
         document.addEventListener('visibilitychange', () => {
