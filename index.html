@@ -10,18 +10,60 @@
         :root {
             --bg: #F6F7F9;
             --surface: #FFFFFF;
+            --surface-soft: #F3F4F6;
             --card-stock: #E8F5E9;
             --card-stock-border: #9CCC9E;
             --card-buy: #FFF3E0;
             --card-buy-border: #FFB74D;
             --card-catalog: #FFFFFF;
             --card-catalog-border: #E5E7EB;
+            --card-inner-bg: rgba(255, 255, 255, 0.85);
+            --card-inner-border: rgba(0, 0, 0, 0.06);
             --text-main: #18181B;
             --text-muted: #6B7280;
+            --border-subtle: #E5E7EB;
+            --border-input: #D1D5DB;
             --danger: #DC2626;
             --primary: #2563EB;
+            --catalog-pick-bg: #EFF6FF;
             --success: #059669;
+            --toast-bg: #FFFFFF;
+            --toast-border: #F59E0B;
+            --toast-track: #FEF3C7;
+            --toast-bar: #F59E0B;
+            --save-bar-bg: #18181B;
+            --save-bar-text: #FFFFFF;
+            --modal-bg: #FFFFFF;
             --radius: 18px;
+        }
+
+        body.dark-theme {
+            --bg: #0F1115;
+            --surface: #181B21;
+            --surface-soft: #232730;
+            --card-stock: #15291C;
+            --card-stock-border: #2B593B;
+            --card-buy: #2B2012;
+            --card-buy-border: #7C531E;
+            --card-catalog: #181B21;
+            --card-catalog-border: #2C313C;
+            --card-inner-bg: rgba(15, 17, 21, 0.68);
+            --card-inner-border: rgba(255, 255, 255, 0.08);
+            --text-main: #F3F4F6;
+            --text-muted: #9CA3AF;
+            --border-subtle: #2C313C;
+            --border-input: #374151;
+            --danger: #F87171;
+            --primary: #3B82F6;
+            --catalog-pick-bg: #1E293B;
+            --success: #10B981;
+            --toast-bg: #1C2028;
+            --toast-border: #D97706;
+            --toast-track: #3B2810;
+            --toast-bar: #F59E0B;
+            --save-bar-bg: #232730;
+            --save-bar-text: #F9FAFB;
+            --modal-bg: #181B21;
         }
 
         * {
@@ -39,20 +81,42 @@
             padding-bottom: 120px;
             max-width: 1240px;
             margin: 0 auto;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 14px;
+            flex-wrap: wrap;
         }
 
         h1 {
             font-size: 22px;
             font-weight: 800;
             letter-spacing: -0.4px;
+            color: var(--text-main);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-btn {
+            background: var(--surface);
+            color: var(--text-main);
+            border: 1.5px solid var(--border-input);
+            padding: 10px 12px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 44px;
+            white-space: nowrap;
         }
 
         .add-btn {
@@ -65,6 +129,7 @@
             font-weight: 700;
             cursor: pointer;
             min-height: 44px;
+            white-space: nowrap;
         }
 
         .tabs {
@@ -76,7 +141,7 @@
 
         .tab-btn {
             min-height: 46px;
-            border: 1.5px solid #E5E7EB;
+            border: 1.5px solid var(--border-subtle);
             background: var(--surface);
             border-radius: 14px;
             font-size: 14px;
@@ -88,13 +153,13 @@
 
         .tab-btn.active {
             background: var(--text-main);
-            color: #FFFFFF;
+            color: var(--surface);
             border-color: var(--text-main);
         }
 
         .search-wrap {
             position: relative;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .search-input {
@@ -102,11 +167,15 @@
             min-height: 46px;
             padding: 10px 40px 10px 14px;
             border-radius: 14px;
-            border: 1.5px solid #E5E7EB;
+            border: 1.5px solid var(--border-subtle);
             background: var(--surface);
             font-size: 15px;
             color: var(--text-main);
             outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
         }
 
         .search-input:focus {
@@ -121,7 +190,7 @@
             width: 32px;
             height: 32px;
             border: none;
-            background: #F3F4F6;
+            background: var(--surface-soft);
             color: var(--text-muted);
             border-radius: 999px;
             font-size: 16px;
@@ -134,44 +203,6 @@
             display: block;
         }
 
-        .subcats {
-            display: none;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 6px;
-            margin-bottom: 14px;
-            scrollbar-width: none;
-        }
-
-        .subcats::-webkit-scrollbar {
-            display: none;
-        }
-
-        .subcats.visible {
-            display: flex;
-        }
-
-        .subcat-btn {
-            flex: 0 0 auto;
-            min-height: 38px;
-            padding: 8px 14px;
-            border-radius: 999px;
-            border: 1px solid #D1D5DB;
-            background: var(--surface);
-            color: var(--text-main);
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .subcat-btn.active {
-            background: #2563EB;
-            color: #FFFFFF;
-            border-color: #2563EB;
-        }
-
-        /* Каскад компактных тостов с таймером сверху */
         .toast-stack {
             position: fixed;
             top: 12px;
@@ -195,11 +226,11 @@
             pointer-events: auto;
             position: relative;
             overflow: hidden;
-            background: #FFFFFF;
-            border: 1.5px solid #F59E0B;
+            background: var(--toast-bg);
+            border: 1.5px solid var(--toast-border);
             border-radius: 14px;
             padding: 10px 12px 14px 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -245,13 +276,13 @@
             right: 0;
             bottom: 0;
             height: 4px;
-            background: #FEF3C7;
+            background: var(--toast-track);
         }
 
         .toast-timer-bar {
             height: 100%;
             width: 100%;
-            background: #F59E0B;
+            background: var(--toast-bar);
             transform-origin: left center;
             transition: transform linear;
         }
@@ -278,6 +309,7 @@
             justify-content: space-between;
             border: 1.5px solid var(--card-catalog-border);
             background: var(--card-catalog);
+            color: var(--text-main);
             position: relative;
             min-height: 185px;
         }
@@ -293,8 +325,8 @@
         }
 
         .card.expired_card {
-            border-color: #F87171;
-            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.25);
+            border-color: var(--danger);
+            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.3);
         }
 
         .card-top {
@@ -309,12 +341,12 @@
             width: 52px;
             height: 52px;
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.85);
+            background: var(--card-inner-bg);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            border: 1px solid rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--card-inner-border);
         }
 
         .art-box svg {
@@ -326,8 +358,8 @@
             width: 36px;
             height: 36px;
             border-radius: 12px;
-            border: 1px solid rgba(220, 38, 38, 0.25);
-            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            background: var(--card-inner-bg);
             color: var(--danger);
             font-size: 20px;
             font-weight: 700;
@@ -343,7 +375,7 @@
             font-weight: 700;
             padding: 5px 8px;
             border-radius: 9px;
-            background: rgba(255, 255, 255, 0.85);
+            background: var(--card-inner-bg);
             color: var(--text-muted);
         }
 
@@ -352,6 +384,7 @@
             font-weight: 700;
             line-height: 1.25;
             margin-bottom: 8px;
+            color: var(--text-main);
             word-break: break-word;
         }
 
@@ -360,7 +393,7 @@
             min-height: 42px;
             border-radius: 12px;
             border: none;
-            background: #EFF6FF;
+            background: var(--catalog-pick-bg);
             color: var(--primary);
             font-size: 13px;
             font-weight: 700;
@@ -373,7 +406,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 6px;
-            background: rgba(255, 255, 255, 0.82);
+            background: var(--card-inner-bg);
             padding: 6px;
             border-radius: 12px;
             margin-bottom: 8px;
@@ -383,8 +416,8 @@
             width: 38px;
             height: 38px;
             border-radius: 10px;
-            border: 1px solid #E5E7EB;
-            background: #FFFFFF;
+            border: 1px solid var(--border-input);
+            background: var(--surface);
             font-size: 20px;
             font-weight: 700;
             color: var(--text-main);
@@ -398,6 +431,7 @@
         .amount-text {
             font-size: 14px;
             font-weight: 800;
+            color: var(--text-main);
             text-align: center;
             cursor: pointer;
             padding: 4px;
@@ -408,8 +442,8 @@
             min-height: 36px;
             padding: 6px 10px;
             border-radius: 10px;
-            border: 1px solid #D1D5DB;
-            background: #FFFFFF;
+            border: 1px solid var(--border-input);
+            background: var(--surface);
             font-size: 12px;
             font-weight: 700;
             color: var(--text-main);
@@ -449,15 +483,16 @@
             bottom: 16px;
             left: 50%;
             transform: translateX(-50%) translateY(160%);
-            background: #18181B;
-            color: #FFFFFF;
+            background: var(--save-bar-bg);
+            color: var(--save-bar-text);
+            border: 1px solid var(--border-input);
             padding: 12px 16px;
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
             transition: transform 0.25s ease;
             z-index: 100;
             width: calc(100% - 24px);
@@ -489,9 +524,9 @@
             min-height: 40px;
             padding: 8px 12px;
             border-radius: 12px;
-            border: 1px solid #52525B;
+            border: 1px solid var(--border-input);
             background: transparent;
-            color: #E4E4E7;
+            color: var(--text-main);
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
@@ -500,7 +535,7 @@
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.45);
+            background: rgba(0, 0, 0, 0.6);
             display: none;
             align-items: center;
             justify-content: center;
@@ -513,7 +548,9 @@
         }
 
         .modal {
-            background: #FFFFFF;
+            background: var(--modal-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-subtle);
             padding: 20px;
             border-radius: 22px;
             width: 100%;
@@ -525,6 +562,7 @@
         .modal h2 {
             font-size: 19px;
             margin-bottom: 14px;
+            color: var(--text-main);
         }
 
         .form-group {
@@ -544,17 +582,54 @@
             width: 100%;
             min-height: 44px;
             padding: 10px 12px;
-            border: 1.5px solid #D1D5DB;
+            border: 1.5px solid var(--border-input);
             border-radius: 12px;
             font-size: 15px;
             color: var(--text-main);
-            background: #FFFFFF;
+            background: var(--surface-soft);
         }
 
         .row-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
+        }
+
+        .target-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 14px;
+            margin-bottom: 8px;
+        }
+
+        .target-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-to-stock {
+            min-height: 44px;
+            border-radius: 12px;
+            border: 1.5px solid var(--card-stock-border);
+            background: var(--card-stock);
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-to-buy {
+            min-height: 44px;
+            border-radius: 12px;
+            border: 1.5px solid var(--card-buy-border);
+            background: var(--card-buy);
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
         }
 
         .modal-foot {
@@ -568,8 +643,9 @@
             min-height: 44px;
             padding: 10px 16px;
             border-radius: 12px;
-            border: 1px solid #D1D5DB;
-            background: #FFFFFF;
+            border: 1px solid var(--border-input);
+            background: var(--surface);
+            color: var(--text-main);
             font-size: 14px;
             font-weight: 700;
             cursor: pointer;
@@ -590,27 +666,21 @@
 
     <header>
         <h1>🧊 Холодильник</h1>
-        <button class="add-btn" onclick="openCreateModal()">+ Свой продукт</button>
+        <div class="header-actions">
+            <button id="themeBtn" class="theme-btn" type="button" onclick="toggleTheme()">🌙 Тёмная</button>
+            <button class="add-btn" type="button" onclick="openCreateModal()">+ Свой продукт</button>
+        </div>
     </header>
 
     <div class="tabs">
-        <button class="tab-btn active" data-tab="in_stock" onclick="switchTab('in_stock')">В холодильнике</button>
+        <button class="tab-btn active" data-tab="in_stock" onclick="switchTab('in_stock')">Запасы</button>
         <button class="tab-btn" data-tab="to_buy" onclick="switchTab('to_buy')">Купить</button>
         <button class="tab-btn" data-tab="catalog" onclick="switchTab('catalog')">Все</button>
     </div>
 
     <div class="search-wrap">
-        <input id="searchInput" class="search-input" type="search" placeholder="Поиск продукта в текущем разделе..." oninput="handleSearch()">
+        <input id="searchInput" class="search-input" type="search" placeholder="Поиск продукта..." oninput="handleSearch()">
         <button id="searchClear" class="search-clear" onclick="clearSearch()">×</button>
-    </div>
-
-    <div id="subcats" class="subcats">
-        <button class="subcat-btn active" data-sub="all" onclick="setSubcat('all')">Все</button>
-        <button class="subcat-btn" data-sub="meat" onclick="setSubcat('meat')">Мясо</button>
-        <button class="subcat-btn" data-sub="dairy" onclick="setSubcat('dairy')">Молочка</button>
-        <button class="subcat-btn" data-sub="produce" onclick="setSubcat('produce')">Овощи и фрукты</button>
-        <button class="subcat-btn" data-sub="pantry" onclick="setSubcat('pantry')">Бакалея и соусы</button>
-        <button class="subcat-btn" data-sub="other" onclick="setSubcat('other')">Разное</button>
     </div>
 
     <div id="grid" class="grid">
@@ -665,49 +735,16 @@
     <!-- Модалка создания своего продукта -->
     <div id="createModal" class="modal-overlay">
         <div class="modal">
-            <h2>Новый продукт в каталог</h2>
+            <h2>Новый продукт</h2>
 
             <div class="form-group">
                 <label>Название</label>
-                <input type="text" id="newName" placeholder="Например: Фарш говяжий или Кетчуп" oninput="autoPickArt()">
+                <input type="text" id="newName" placeholder="Например: Молоко или Фарш">
             </div>
 
             <div class="row-2">
                 <div class="form-group">
-                    <label>Подкатегория в «Все»</label>
-                    <select id="newSubcat">
-                        <option value="meat">Мясо</option>
-                        <option value="dairy">Молочка</option>
-                        <option value="produce">Овощи и фрукты</option>
-                        <option value="pantry">Бакалея и соусы</option>
-                        <option value="other">Разное</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Картинка</label>
-                    <select id="newArt">
-                        <option value="beef">Корова (говядина)</option>
-                        <option value="pork">Свинья (свинина)</option>
-                        <option value="chicken">Курица / птица</option>
-                        <option value="mince">Фарш</option>
-                        <option value="fish">Рыба</option>
-                        <option value="milk">Молоко</option>
-                        <option value="eggs">Яйца</option>
-                        <option value="cheese">Сыр</option>
-                        <option value="butter">Масло</option>
-                        <option value="ketchup">Кетчуп / соус</option>
-                        <option value="spice">Специи / приправы</option>
-                        <option value="veg">Овощи / фрукты</option>
-                        <option value="grain">Крупы / макароны</option>
-                        <option value="bread">Хлеб / выпечка</option>
-                        <option value="drink">Напитки</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row-2">
-                <div class="form-group">
-                    <label>Объём по умолчанию</label>
+                    <label>Количество</label>
                     <input type="number" step="0.1" min="0" id="newAmount" value="1">
                 </div>
                 <div class="form-group">
@@ -723,18 +760,14 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Куда добавить сразу</label>
-                <select id="newTarget">
-                    <option value="catalog">Только в каталог «Все»</option>
-                    <option value="to_buy">Сразу в «Купить»</option>
-                    <option value="in_stock">Сразу в «В холодильнике»</option>
-                </select>
+            <span class="target-label">Добавить в</span>
+            <div class="target-buttons">
+                <button type="button" class="btn-to-stock" onclick="createCustomItem('in_stock')">Запасы</button>
+                <button type="button" class="btn-to-buy" onclick="createCustomItem('to_buy')">Купить</button>
             </div>
 
             <div class="modal-foot">
                 <button type="button" class="btn-secondary" onclick="closeCreateModal()">Отмена</button>
-                <button type="button" class="add-btn" onclick="createCustomItem()">Добавить</button>
             </div>
         </div>
     </div>
@@ -742,6 +775,8 @@
     <script>
         const SUPABASE_URL = 'https://apbcpdezonelduxbetwe.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_we-qWXWbsR14G3BT4Jzm0g_j05oVZ8p';
+        const THEME_STORAGE_KEY = 'fridge_device_theme_v1';
+        const CACHE_STORAGE_KEY = 'fridge_items_cache_v1';
 
         const MAX_TOASTS = 3;
         const TOAST_DURATION_MS = 7000;
@@ -765,65 +800,101 @@
         };
 
         const DEFAULT_CATALOG = [
-            { name: 'Молоко', subcat: 'dairy', art: 'milk', amount: 1, unit: 'л' },
-            { name: 'Яйца', subcat: 'dairy', art: 'eggs', amount: 10, unit: 'шт' },
-            { name: 'Сыр', subcat: 'dairy', art: 'cheese', amount: 300, unit: 'г' },
-            { name: 'Сливочное масло', subcat: 'dairy', art: 'butter', amount: 180, unit: 'г' },
-            { name: 'Говядина', subcat: 'meat', art: 'beef', amount: 1, unit: 'кг' },
-            { name: 'Свинина', subcat: 'meat', art: 'pork', amount: 1, unit: 'кг' },
-            { name: 'Курица', subcat: 'meat', art: 'chicken', amount: 1, unit: 'кг' },
-            { name: 'Фарш говяжий', subcat: 'meat', art: 'mince', amount: 500, unit: 'г' },
-            { name: 'Фарш свиной', subcat: 'meat', art: 'mince', amount: 500, unit: 'г' },
-            { name: 'Рыба', subcat: 'meat', art: 'fish', amount: 600, unit: 'г' },
-            { name: 'Кетчуп', subcat: 'pantry', art: 'ketchup', amount: 1, unit: 'шт' },
-            { name: 'Специи и приправы', subcat: 'pantry', art: 'spice', amount: 1, unit: 'уп' },
-            { name: 'Рис', subcat: 'pantry', art: 'grain', amount: 1, unit: 'кг' },
-            { name: 'Гречка', subcat: 'pantry', art: 'grain', amount: 1, unit: 'кг' },
-            { name: 'Макароны', subcat: 'pantry', art: 'grain', amount: 500, unit: 'г' },
-            { name: 'Овощи и зелень', subcat: 'produce', art: 'veg', amount: 1, unit: 'кг' },
-            { name: 'Хлеб', subcat: 'other', art: 'bread', amount: 1, unit: 'шт' },
-            { name: 'Вода / напитки', subcat: 'other', art: 'drink', amount: 1.5, unit: 'л' }
+            { id: -101, name: 'Молоко', art: 'milk', amount: 1, unit: 'л', status: 'catalog' },
+            { id: -102, name: 'Яйца', art: 'eggs', amount: 10, unit: 'шт', status: 'catalog' },
+            { id: -103, name: 'Сыр', art: 'cheese', amount: 300, unit: 'г', status: 'catalog' },
+            { id: -104, name: 'Сливочное масло', art: 'butter', amount: 180, unit: 'г', status: 'catalog' },
+            { id: -105, name: 'Говядина', art: 'beef', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -106, name: 'Свинина', art: 'pork', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -107, name: 'Курица', art: 'chicken', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -108, name: 'Фарш говяжий', art: 'mince', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -109, name: 'Фарш свиной', art: 'mince', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -110, name: 'Рыба', art: 'fish', amount: 600, unit: 'г', status: 'catalog' },
+            { id: -111, name: 'Кетчуп', art: 'ketchup', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -112, name: 'Специи и приправы', art: 'spice', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -113, name: 'Рис', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -114, name: 'Гречка', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -115, name: 'Макароны', art: 'grain', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -116, name: 'Овощи и зелень', art: 'veg', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -117, name: 'Хлеб', art: 'bread', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -118, name: 'Вода / напитки', art: 'drink', amount: 1.5, unit: 'л', status: 'catalog' }
         ];
 
         let originalItems = [];
         let draftItems = [];
         let deletedIds = [];
         let currentTab = 'in_stock';
-        let currentSubcat = 'all';
         let searchQuery = '';
         let hasUnsavedChanges = false;
         let activeToasts = [];
+
+        function capitalizeFirst(str) {
+            const trimmed = String(str || '').trim();
+            if (!trimmed) return 'Без названия';
+            if (trimmed.length > 1 && trimmed === trimmed.toUpperCase()) return trimmed;
+            return trimmed.charAt(0).toLocaleUpperCase('ru-RU') + trimmed.slice(1);
+        }
+
+        function applyTheme(theme) {
+            const isDark = theme === 'dark';
+            document.body.classList.toggle('dark-theme', isDark);
+            const btn = document.getElementById('themeBtn');
+            if (btn) {
+                btn.innerText = isDark ? '☀️ Светлая' : '🌙 Тёмная';
+            }
+            try {
+                localStorage.setItem(THEME_STORAGE_KEY, isDark ? 'dark' : 'light');
+            } catch (_) {}
+        }
+
+        function toggleTheme() {
+            const nextTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+            applyTheme(nextTheme);
+        }
+
+        function initTheme() {
+            let saved = null;
+            try {
+                saved = localStorage.getItem(THEME_STORAGE_KEY);
+            } catch (_) {}
+            if (saved === 'dark' || saved === 'light') {
+                applyTheme(saved);
+            } else {
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                applyTheme(prefersDark ? 'dark' : 'light');
+            }
+        }
+
+        function detectArtByName(rawName) {
+            const name = (rawName || '').toLowerCase();
+            if (name.includes('говяд')) return 'beef';
+            if (name.includes('свин')) return 'pork';
+            if (name.includes('куриц') || name.includes('филе') || name.includes('бедр')) return 'chicken';
+            if (name.includes('фарш')) return 'mince';
+            if (name.includes('рыб') || name.includes('лосос') || name.includes('минтай')) return 'fish';
+            if (name.includes('молок') || name.includes('кефир') || name.includes('йогурт')) return 'milk';
+            if (name.includes('яйц')) return 'eggs';
+            if (name.includes('сыр')) return 'cheese';
+            if (name.includes('масл')) return 'butter';
+            if (name.includes('кетчуп') || name.includes('соус') || name.includes('майонез')) return 'ketchup';
+            if (name.includes('спец') || name.includes('приправ') || name.includes('перец') || name.includes('соль')) return 'spice';
+            if (name.includes('рис') || name.includes('греч') || name.includes('макарон') || name.includes('овсян')) return 'grain';
+            if (name.includes('хлеб') || name.includes('булк') || name.includes('лаваш')) return 'bread';
+            if (name.includes('вод') || name.includes('сок') || name.includes('чай') || name.includes('кофе')) return 'drink';
+            return 'veg';
+        }
 
         function renderArt(artKey) {
             return SVG_ART[artKey] || SVG_ART.veg;
         }
 
-        function autoPickArt() {
-            const name = document.getElementById('newName').value.toLowerCase();
-            const artSel = document.getElementById('newArt');
-            const subSel = document.getElementById('newSubcat');
-
-            if (name.includes('говяд')) { artSel.value = 'beef'; subSel.value = 'meat'; return; }
-            if (name.includes('свин')) { artSel.value = 'pork'; subSel.value = 'meat'; return; }
-            if (name.includes('куриц') || name.includes('филе') || name.includes('бедр')) { artSel.value = 'chicken'; subSel.value = 'meat'; return; }
-            if (name.includes('фарш')) { artSel.value = 'mince'; subSel.value = 'meat'; return; }
-            if (name.includes('рыб') || name.includes('лосос') || name.includes('минтай')) { artSel.value = 'fish'; subSel.value = 'meat'; return; }
-            if (name.includes('молок') || name.includes('кефир') || name.includes('йогурт')) { artSel.value = 'milk'; subSel.value = 'dairy'; return; }
-            if (name.includes('яйц')) { artSel.value = 'eggs'; subSel.value = 'dairy'; return; }
-            if (name.includes('сыр')) { artSel.value = 'cheese'; subSel.value = 'dairy'; return; }
-            if (name.includes('масл')) { artSel.value = 'butter'; subSel.value = 'dairy'; return; }
-            if (name.includes('кетчуп') || name.includes('соус') || name.includes('майонез')) { artSel.value = 'ketchup'; subSel.value = 'pantry'; return; }
-            if (name.includes('спец') || name.includes('приправ') || name.includes('перец') || name.includes('соль')) { artSel.value = 'spice'; subSel.value = 'pantry'; return; }
-            if (name.includes('рис') || name.includes('греч') || name.includes('макарон') || name.includes('овсян')) { artSel.value = 'grain'; subSel.value = 'pantry'; return; }
-            if (name.includes('хлеб') || name.includes('булк') || name.includes('лаваш')) { artSel.value = 'bread'; subSel.value = 'other'; return; }
-            if (name.includes('вод') || name.includes('сок') || name.includes('чай') || name.includes('кофе')) { artSel.value = 'drink'; subSel.value = 'other'; return; }
-        }
-
         function normalizeItem(raw) {
+            const isVirtualDefault = Number(raw.id) < -100;
             return {
                 id: raw.id,
-                name: raw.name || 'Без названия',
-                icon: raw.icon || 'veg',
+                isNew: Boolean(raw.isNew || isVirtualDefault),
+                name: capitalizeFirst(raw.name || 'Без названия'),
+                icon: raw.icon || raw.art || detectArtByName(raw.name),
                 amount: Number(raw.amount) || 0,
                 unit: raw.unit || 'шт',
                 status: raw.status || 'catalog',
@@ -831,19 +902,25 @@
             };
         }
 
-        function parseSubcat(item) {
-            if (item.expiry && item.expiry.startsWith('cat:')) {
-                return item.expiry.slice(4);
+        function readLocalCache() {
+            try {
+                const raw = localStorage.getItem(CACHE_STORAGE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) && parsed.length > 0 ? parsed.map(normalizeItem) : null;
+            } catch (_) {
+                return null;
             }
-            if (['beef', 'pork', 'chicken', 'mince', 'fish'].includes(item.icon)) return 'meat';
-            if (['milk', 'eggs', 'cheese', 'butter'].includes(item.icon)) return 'dairy';
-            if (['veg'].includes(item.icon)) return 'produce';
-            if (['ketchup', 'spice', 'grain'].includes(item.icon)) return 'pantry';
-            return 'other';
+        }
+
+        function writeLocalCache(items) {
+            try {
+                localStorage.setItem(CACHE_STORAGE_KEY, JSON.stringify(items));
+            } catch (_) {}
         }
 
         function isExpiredOrSoon(dateStr) {
-            if (!dateStr || dateStr.startsWith('cat:')) return { text: 'Срок не указан', urgent: false, expired: false };
+            if (!dateStr || String(dateStr).startsWith('cat:')) return { text: 'Срок не указан', urgent: false, expired: false };
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const exp = new Date(dateStr + 'T00:00:00');
@@ -880,6 +957,7 @@
 
         function spawnDepletedToast(itemId, itemName, restoreAmount) {
             const stack = document.getElementById('toastStack');
+            const labelName = capitalizeFirst(itemName);
 
             while (activeToasts.length >= MAX_TOASTS) {
                 removeToast(activeToasts[0], true);
@@ -888,7 +966,7 @@
             const el = document.createElement('div');
             el.className = 'toast-item';
             el.innerHTML = `
-                <div class="toast-label">Добавить в «Купить»<br>«${itemName}»?</div>
+                <div class="toast-label">Добавить в «Купить»<br>«${labelName}»?</div>
                 <button class="toast-yes" type="button">Да</button>
                 <div class="toast-timer-track"><div class="toast-timer-bar"></div></div>
             `;
@@ -924,7 +1002,25 @@
             }, TOAST_DURATION_MS);
         }
 
+        function loadFallbackCatalog(keepUnsaved = false) {
+            const cached = readLocalCache();
+            const base = cached || DEFAULT_CATALOG.map(normalizeItem);
+            originalItems = JSON.parse(JSON.stringify(base));
+            draftItems = JSON.parse(JSON.stringify(base));
+            deletedIds = [];
+            clearAllToasts();
+            setUnsaved(keepUnsaved);
+            render();
+        }
+
         async function fetchItems() {
+            const cached = readLocalCache();
+            if (cached && draftItems.length === 0) {
+                originalItems = JSON.parse(JSON.stringify(cached));
+                draftItems = JSON.parse(JSON.stringify(cached));
+                render();
+            }
+
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?select=*&order=id.asc`, {
                     headers: {
@@ -932,11 +1028,12 @@
                         'Authorization': `Bearer ${SUPABASE_KEY}`
                     }
                 });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 if (!Array.isArray(data)) throw new Error('Bad response');
 
                 if (data.length === 0) {
-                    await seedDefaultCatalog();
+                    loadFallbackCatalog(true);
                     return;
                 }
 
@@ -944,54 +1041,27 @@
                 originalItems = JSON.parse(JSON.stringify(normalized));
                 draftItems = JSON.parse(JSON.stringify(normalized));
                 deletedIds = [];
+                writeLocalCache(normalized);
                 clearAllToasts();
                 setUnsaved(false);
                 render();
             } catch (err) {
-                document.getElementById('grid').innerHTML = '<div class="empty-state">Не удалось загрузить данные. Проверь настройки базы и интернет.</div>';
+                loadFallbackCatalog(false);
             }
-        }
-
-        async function seedDefaultCatalog() {
-            for (const item of DEFAULT_CATALOG) {
-                await fetch(`${SUPABASE_URL}/rest/v1/fridge_items`, {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: item.name,
-                        icon: item.art,
-                        amount: item.amount,
-                        unit: item.unit,
-                        status: 'catalog',
-                        expiry: `cat:${item.subcat}`
-                    })
-                });
-            }
-            await fetchItems();
         }
 
         function setUnsaved(val) {
             hasUnsavedChanges = val;
             document.getElementById('saveBar').classList.toggle('visible', val);
+            if (val) {
+                writeLocalCache(draftItems);
+            }
         }
 
         function switchTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.tab === tab);
-            });
-            document.getElementById('subcats').classList.toggle('visible', tab === 'catalog');
-            render();
-        }
-
-        function setSubcat(sub) {
-            currentSubcat = sub;
-            document.querySelectorAll('.subcat-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.sub === sub);
             });
             render();
         }
@@ -1009,6 +1079,30 @@
             render();
         }
 
+        function getScaledNextAmount(current, unit, dir) {
+            const val = Number(current) || 0;
+            if (unit === 'л' || unit === 'кг') {
+                if (dir < 0) {
+                    if (val > 1) return Math.round((val - 0.5) * 100) / 100;
+                    if (val > 0.8) return 0.8;
+                    if (val > 0.5) return 0.5;
+                    if (val > 0.2) return 0.2;
+                    return 0;
+                } else {
+                    if (val < 0.2) return 0.2;
+                    if (val < 0.5) return 0.5;
+                    if (val < 0.8) return 0.8;
+                    if (val < 1) return 1;
+                    return Math.round((val + 0.5) * 100) / 100;
+                }
+            }
+            if (unit === 'г' || unit === 'мл') {
+                const step = 100;
+                return Math.max(0, val + dir * step);
+            }
+            return Math.max(0, Math.round((val + dir * 1) * 100) / 100);
+        }
+
         function render() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
@@ -1016,7 +1110,6 @@
             const items = draftItems.filter(item => {
                 if (currentTab === 'in_stock' && item.status !== 'in_stock') return false;
                 if (currentTab === 'to_buy' && item.status !== 'to_buy') return false;
-                if (currentTab === 'catalog' && currentSubcat !== 'all' && parseSubcat(item) !== currentSubcat) return false;
                 if (searchQuery && !item.name.toLowerCase().includes(searchQuery)) return false;
                 return true;
             });
@@ -1027,6 +1120,7 @@
             }
 
             items.forEach(item => {
+                const title = capitalizeFirst(item.name);
                 const card = document.createElement('div');
                 card.className = `card ${item.status}`;
 
@@ -1039,7 +1133,7 @@
                                 <div class="art-box">${renderArt(item.icon)}</div>
                                 <button class="edit-vol-btn" onclick="openActionModal(${item.id}, 'edit_stock')">Изм.</button>
                             </div>
-                            <div class="card-title">${item.name}</div>
+                            <div class="card-title">${title}</div>
                         </div>
                         <div>
                             <div class="amount-row">
@@ -1060,25 +1154,25 @@
                                 <div class="art-box">${renderArt(item.icon)}</div>
                                 <button class="del-x-btn" title="Убрать из списка" onclick="removeFromBuy(${item.id})">×</button>
                             </div>
-                            <div class="card-title">${item.name}</div>
+                            <div class="card-title">${title}</div>
                         </div>
                         <div>
                             <div class="amount-row">
                                 <span class="amount-text" style="text-align:left;padding-left:6px;">${item.amount} ${item.unit}</span>
                                 <button class="edit-vol-btn" onclick="openActionModal(${item.id}, 'edit_buy')">Изм. объём</button>
                             </div>
-                            <button class="bought-btn" onclick="openActionModal(${item.id}, 'mark_bought')">Куплено → в холодильник</button>
+                            <button class="bought-btn" onclick="openActionModal(${item.id}, 'mark_bought')">Куплено → в запасы</button>
                         </div>
                     `;
                 } else {
-                    const stateText = item.status === 'in_stock' ? 'В холодильнике' : (item.status === 'to_buy' ? 'В списке «Купить»' : 'В каталоге');
+                    const stateText = item.status === 'in_stock' ? 'В запасах' : (item.status === 'to_buy' ? 'В «Купить»' : 'В каталоге');
                     card.innerHTML = `
                         <div>
                             <div class="card-top">
                                 <div class="art-box">${renderArt(item.icon)}</div>
                                 <span class="badge-tag">${stateText}</span>
                             </div>
-                            <div class="card-title">${item.name}</div>
+                            <div class="card-title">${title}</div>
                         </div>
                         <div>
                             <button class="catalog-pick-btn" onclick="openActionModal(${item.id}, 'pick_to_buy')">+ В «Купить»</button>
@@ -1093,15 +1187,13 @@
         function stepAmount(id, dir) {
             const item = draftItems.find(i => i.id === id);
             if (!item) return;
-            const step = (item.unit === 'кг' || item.unit === 'л') ? 0.5 : 1;
             const prevAmount = item.amount;
-            const nextVal = Math.max(0, Math.round((item.amount + dir * step) * 100) / 100);
+            const nextVal = getScaledNextAmount(item.amount, item.unit, dir);
 
             if (dir < 0 && nextVal === 0 && item.status === 'in_stock') {
-                const subcat = parseSubcat(item);
                 item.amount = 0;
                 item.status = 'catalog';
-                item.expiry = `cat:${subcat}`;
+                item.expiry = null;
                 spawnDepletedToast(item.id, item.name, prevAmount > 0 ? prevAmount : 1);
                 setUnsaved(true);
                 render();
@@ -1117,7 +1209,6 @@
             const item = draftItems.find(i => i.id === id);
             if (!item) return;
             item.status = 'catalog';
-            item.expiry = `cat:${parseSubcat(item)}`;
             setUnsaved(true);
             render();
         }
@@ -1125,6 +1216,7 @@
         function openActionModal(id, mode) {
             const item = draftItems.find(i => i.id === id);
             if (!item) return;
+            const title = capitalizeFirst(item.name);
 
             document.getElementById('actionItemId').value = id;
             document.getElementById('actionMode').value = mode;
@@ -1135,19 +1227,19 @@
             const expiryInput = document.getElementById('actionExpiry');
 
             if (mode === 'pick_to_buy') {
-                document.getElementById('actionTitle').innerText = `Купить: ${item.name}`;
+                document.getElementById('actionTitle').innerText = `Купить: ${title}`;
                 expiryField.style.display = 'none';
             } else if (mode === 'edit_buy') {
-                document.getElementById('actionTitle').innerText = `Объём покупки: ${item.name}`;
+                document.getElementById('actionTitle').innerText = `Объём покупки: ${title}`;
                 expiryField.style.display = 'none';
             } else if (mode === 'mark_bought') {
-                document.getElementById('actionTitle').innerText = `В холодильник: ${item.name}`;
+                document.getElementById('actionTitle').innerText = `В запасы: ${title}`;
                 expiryField.style.display = 'block';
-                expiryInput.value = (item.expiry && !item.expiry.startsWith('cat:')) ? item.expiry : '';
+                expiryInput.value = (item.expiry && !String(item.expiry).startsWith('cat:')) ? item.expiry : '';
             } else {
-                document.getElementById('actionTitle').innerText = `Изменить: ${item.name}`;
+                document.getElementById('actionTitle').innerText = `Изменить: ${title}`;
                 expiryField.style.display = 'block';
-                expiryInput.value = (item.expiry && !item.expiry.startsWith('cat:')) ? item.expiry : '';
+                expiryInput.value = (item.expiry && !String(item.expiry).startsWith('cat:')) ? item.expiry : '';
             }
 
             document.getElementById('actionModal').classList.add('open');
@@ -1176,7 +1268,7 @@
                 if (matchedToast) removeToast(matchedToast, false);
             } else if (mode === 'mark_bought' || mode === 'edit_stock') {
                 item.status = 'in_stock';
-                item.expiry = expVal ? expVal : `cat:${parseSubcat(item)}`;
+                item.expiry = expVal || null;
             }
 
             setUnsaved(true);
@@ -1188,33 +1280,32 @@
             document.getElementById('newName').value = '';
             document.getElementById('newAmount').value = '1';
             document.getElementById('newUnit').value = 'шт';
-            document.getElementById('newTarget').value = currentTab === 'to_buy' ? 'to_buy' : (currentTab === 'in_stock' ? 'in_stock' : 'catalog');
             document.getElementById('createModal').classList.add('open');
+            setTimeout(() => document.getElementById('newName').focus(), 50);
         }
 
         function closeCreateModal() {
             document.getElementById('createModal').classList.remove('open');
         }
 
-        function createCustomItem() {
-            const name = document.getElementById('newName').value.trim();
-            if (!name) return alert('Введи название продукта');
+        function createCustomItem(targetStatus) {
+            const rawName = document.getElementById('newName').value.trim();
+            if (!rawName) return alert('Введи название продукта');
 
-            const subcat = document.getElementById('newSubcat').value;
-            const art = document.getElementById('newArt').value;
+            const name = capitalizeFirst(rawName);
+            const art = detectArtByName(name);
             const amount = Math.max(0, parseFloat(document.getElementById('newAmount').value) || 0);
             const unit = document.getElementById('newUnit').value;
-            const status = document.getElementById('newTarget').value;
 
             draftItems.push({
                 id: -Date.now(),
                 isNew: true,
                 name,
                 icon: art,
-                amount,
+                amount: amount > 0 ? amount : 1,
                 unit,
-                status,
-                expiry: `cat:${subcat}`
+                status: targetStatus,
+                expiry: null
             });
 
             setUnsaved(true);
@@ -1225,6 +1316,7 @@
         function discardChanges() {
             draftItems = JSON.parse(JSON.stringify(originalItems));
             deletedIds = [];
+            writeLocalCache(originalItems);
             clearAllToasts();
             setUnsaved(false);
             render();
@@ -1235,20 +1327,26 @@
             btn.disabled = true;
             btn.innerText = 'Сохранение...';
 
+            const headers = {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            };
+
             try {
                 for (const id of deletedIds) {
-                    await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`
-                        }
-                    });
+                    if (Number(id) > 0) {
+                        const delRes = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${id}`, {
+                            method: 'DELETE',
+                            headers
+                        });
+                        if (!delRes.ok) throw new Error(`DELETE ${delRes.status}`);
+                    }
                 }
 
                 for (const item of draftItems) {
                     const payload = {
-                        name: item.name,
+                        name: capitalizeFirst(item.name),
                         icon: item.icon,
                         amount: item.amount,
                         unit: item.unit,
@@ -1256,38 +1354,43 @@
                         expiry: item.expiry
                     };
 
-                    if (item.isNew) {
-                        await fetch(`${SUPABASE_URL}/rest/v1/fridge_items`, {
+                    if (item.isNew || Number(item.id) < 0) {
+                        const postRes = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items`, {
                             method: 'POST',
                             headers: {
-                                'apikey': SUPABASE_KEY,
-                                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                'Content-Type': 'application/json'
+                                ...headers,
+                                'Prefer': 'return=representation'
                             },
                             body: JSON.stringify(payload)
                         });
+                        if (!postRes.ok) {
+                            const errText = await postRes.text();
+                            throw new Error(`POST ${postRes.status}: ${errText}`);
+                        }
                     } else {
-                        await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${item.id}`, {
+                        const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${item.id}`, {
                             method: 'PATCH',
-                            headers: {
-                                'apikey': SUPABASE_KEY,
-                                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                                'Content-Type': 'application/json'
-                            },
+                            headers,
                             body: JSON.stringify(payload)
                         });
+                        if (!patchRes.ok) {
+                            const errText = await patchRes.text();
+                            throw new Error(`PATCH ${patchRes.status}: ${errText}`);
+                        }
                     }
                 }
 
                 await fetchItems();
             } catch (e) {
-                alert('Ошибка при сохранении. Проверь подключение к сети.');
+                writeLocalCache(draftItems);
+                alert(`Не удалось отправить в базу (${e.message}). Черновик сохранён локально на устройстве — попробуй нажать «Сохранить» ещё раз или сменить режим VPN.`);
             } finally {
                 btn.disabled = false;
                 btn.innerText = 'Сохранить';
             }
         }
 
+        initTheme();
         fetchItems();
     </script>
 </body>
