@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,18 +7,20 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <style>
-        :root {
+        :root,
+        :root[data-theme="light"] {
+            color-scheme: light;
             --bg: #F6F7F9;
             --surface: #FFFFFF;
-            --surface-soft: #F3F4F6;
+            --surface-soft: #EEF1F5;
             --card-stock: #E8F5E9;
             --card-stock-border: #81C784;
             --card-buy: #FFF3E0;
             --card-buy-border: #FFB74D;
             --card-catalog: #FFFFFF;
             --card-catalog-border: #D1D5DB;
-            --card-inner-bg: rgba(255, 255, 255, 0.88);
-            --card-inner-border: rgba(0, 0, 0, 0.08);
+            --card-inner-bg: #F8FAFC;
+            --card-inner-border: #E2E8F0;
             --text-main: #111827;
             --text-muted: #4B5563;
             --border-subtle: #E5E7EB;
@@ -37,7 +39,9 @@
             --radius: 18px;
         }
 
+        :root[data-theme="dark"],
         body.dark-theme {
+            color-scheme: dark;
             --bg: #0D0F13;
             --surface: #171A21;
             --surface-soft: #222732;
@@ -47,8 +51,8 @@
             --card-buy-border: #9A5B13;
             --card-catalog: #171A21;
             --card-catalog-border: #2E3442;
-            --card-inner-bg: rgba(13, 15, 19, 0.72);
-            --card-inner-border: rgba(255, 255, 255, 0.1);
+            --card-inner-bg: #11141A;
+            --card-inner-border: #2A303D;
             --text-main: #F9FAFB;
             --text-muted: #9CA3AF;
             --border-subtle: #2E3442;
@@ -74,14 +78,17 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        html, body {
             background-color: var(--bg);
             color: var(--text-main);
+            min-height: 100%;
+        }
+
+        body {
             padding: 16px;
             padding-bottom: 120px;
             max-width: 1240px;
             margin: 0 auto;
-            transition: background-color 0.18s ease, color 0.18s ease;
         }
 
         header {
@@ -148,7 +155,6 @@
             font-weight: 700;
             color: var(--text-muted);
             cursor: pointer;
-            transition: all 0.15s ease;
         }
 
         .tab-btn.active {
@@ -541,7 +547,7 @@
         }
 
         .save-status {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             line-height: 1.25;
         }
@@ -749,7 +755,6 @@
         </div>
     </div>
 
-    <!-- Модалка объёма и срока годности -->
     <div id="actionModal" class="modal-overlay">
         <div class="modal">
             <h2 id="actionTitle">Параметры продукта</h2>
@@ -786,7 +791,6 @@
         </div>
     </div>
 
-    <!-- Модалка создания своего продукта -->
     <div id="createModal" class="modal-overlay">
         <div class="modal">
             <h2>Новый продукт</h2>
@@ -951,6 +955,7 @@
 
         function applyTheme(theme) {
             const isDark = theme === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
             document.documentElement.classList.toggle('dark-theme', isDark);
             document.body.classList.toggle('dark-theme', isDark);
             const btn = document.getElementById('themeBtn');
@@ -964,7 +969,7 @@
         }
 
         function toggleTheme() {
-            const isDarkNow = document.body.classList.contains('dark-theme') || document.documentElement.classList.contains('dark-theme');
+            const isDarkNow = document.documentElement.getAttribute('data-theme') === 'dark';
             applyTheme(isDarkNow ? 'light' : 'dark');
         }
 
@@ -1139,20 +1144,20 @@
             }, TOAST_DURATION_MS);
         }
 
-        function loadFallbackCatalog(keepUnsaved = false, statusMsg = 'Есть несохранённые правки') {
+        function loadFallbackCatalog(keepUnsaved = false, msg = 'Есть несохранённые правки') {
             const cached = readLocalCache();
             const base = mergeCatalogWithItems(cached || DEFAULT_CATALOG.map(normalizeItem));
             originalItems = JSON.parse(JSON.stringify(base));
             draftItems = JSON.parse(JSON.stringify(base));
             deletedIds = [];
             clearAllToasts();
-            setUnsaved(keepUnsaved, statusMsg);
+            setUnsaved(keepUnsaved, msg);
             render();
         }
 
         async function fetchItems() {
             const cached = readLocalCache();
-            if (cached && draftItems.length === 0) {
+            if (cached) {
                 const mergedCached = mergeCatalogWithItems(cached);
                 originalItems = JSON.parse(JSON.stringify(mergedCached));
                 draftItems = JSON.parse(JSON.stringify(mergedCached));
@@ -1160,18 +1165,20 @@
             }
 
             try {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 5000);
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?select=*&order=id.asc`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
                         'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
+                    },
+                    signal: controller.signal
                 });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                clearTimeout(timer);
+                if (!res.ok) throw new Error('HTTP');
                 const data = await res.json();
-                if (!Array.isArray(data)) throw new Error('Bad response');
-
-                if (data.length === 0) {
-                    loadFallbackCatalog(true, 'Локальный каталог готов — нажми «Сохранить»');
+                if (!Array.isArray(data) || data.length === 0) {
+                    if (!cached) loadFallbackCatalog(false);
                     return;
                 }
 
@@ -1183,19 +1190,17 @@
                 clearAllToasts();
                 setUnsaved(false);
                 render();
-            } catch (err) {
-                loadFallbackCatalog(false);
+            } catch (_) {
+                if (!cached) loadFallbackCatalog(false);
             }
         }
 
-        function setUnsaved(val, statusMsg = 'Есть несохранённые правки') {
+        function setUnsaved(val, msg = 'Есть несохранённые правки') {
             hasUnsavedChanges = val;
             const statusEl = document.getElementById('saveStatusText');
-            if (statusEl) statusEl.innerText = statusMsg;
+            if (statusEl) statusEl.innerText = msg;
             document.getElementById('saveBar').classList.toggle('visible', val);
-            if (val) {
-                writeLocalCache(draftItems);
-            }
+            writeLocalCache(draftItems);
         }
 
         function switchTab(tab) {
@@ -1472,6 +1477,22 @@
             render();
         }
 
+        async function sendWithRetry(url, options, attempts = 2) {
+            for (let i = 0; i < attempts; i++) {
+                try {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => controller.abort(), 5000);
+                    const res = await fetch(url, { ...options, signal: controller.signal });
+                    clearTimeout(timer);
+                    if (res.ok) return res;
+                    if (i === attempts - 1) return res;
+                } catch (err) {
+                    if (i === attempts - 1) throw err;
+                }
+                await new Promise(r => setTimeout(r, 400));
+            }
+        }
+
         async function saveChanges() {
             const btn = document.querySelector('.btn-confirm');
             btn.disabled = true;
@@ -1484,24 +1505,25 @@
                 'Content-Type': 'application/json'
             };
 
-            let syncedOk = true;
-            let lastErrReason = '';
+            let allOk = true;
+            let errInfo = '';
 
             try {
                 for (const id of deletedIds) {
                     if (Number(id) > 0) {
-                        const delRes = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${id}`, {
+                        const delRes = await sendWithRetry(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${id}`, {
                             method: 'DELETE',
                             headers
                         });
-                        if (!delRes.ok) {
-                            syncedOk = false;
-                            lastErrReason = `DELETE ${delRes.status}`;
+                        if (!delRes || !delRes.ok) {
+                            allOk = false;
+                            errInfo = `DEL ${delRes ? delRes.status : 'сеть'}`;
                         }
                     }
                 }
 
                 for (const item of draftItems) {
+                    if (item.status === 'catalog' && item.isNew) continue;
                     const payload = {
                         name: capitalizeFirst(item.name),
                         icon: item.icon,
@@ -1512,48 +1534,46 @@
                     };
 
                     if (item.isNew || Number(item.id) < 0) {
-                        const postRes = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items`, {
+                        const postRes = await sendWithRetry(`${SUPABASE_URL}/rest/v1/fridge_items`, {
                             method: 'POST',
-                            headers: {
-                                ...headers,
-                                'Prefer': 'return=representation'
-                            },
+                            headers: { ...headers, 'Prefer': 'return=representation' },
                             body: JSON.stringify(payload)
                         });
-                        if (postRes.ok) {
+                        if (postRes && postRes.ok) {
                             const created = await postRes.json();
                             if (Array.isArray(created) && created[0] && created[0].id) {
                                 item.id = created[0].id;
                                 item.isNew = false;
                             }
                         } else {
-                            syncedOk = false;
-                            lastErrReason = `POST ${postRes.status}`;
+                            allOk = false;
+                            errInfo = `POST ${postRes ? postRes.status : 'сеть'}`;
                         }
                     } else {
-                        const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${item.id}`, {
+                        const patchRes = await sendWithRetry(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${item.id}`, {
                             method: 'PATCH',
                             headers,
                             body: JSON.stringify(payload)
                         });
-                        if (!patchRes.ok) {
-                            syncedOk = false;
-                            lastErrReason = `PATCH ${patchRes.status}`;
+                        if (!patchRes || !patchRes.ok) {
+                            allOk = false;
+                            errInfo = `PATCH ${patchRes ? patchRes.status : 'сеть'}`;
                         }
                     }
                 }
 
-                if (syncedOk) {
+                writeLocalCache(draftItems);
+
+                if (allOk) {
                     deletedIds = [];
                     originalItems = JSON.parse(JSON.stringify(draftItems));
-                    writeLocalCache(draftItems);
                     clearAllToasts();
                     setUnsaved(false);
                 } else {
-                    setUnsaved(true, `Только локально (${lastErrReason || 'ошибка БД'})`);
+                    setUnsaved(true, `В облако не ушло (${errInfo}) — нажми Сохранить`);
                 }
-            } catch (e) {
-                setUnsaved(true, 'Только локально (нет доступа к облаку)');
+            } catch (_) {
+                setUnsaved(true, 'В облако не ушло — проверь сеть/VPN и нажми Сохранить');
             } finally {
                 btn.disabled = false;
                 btn.innerText = 'Сохранить';
