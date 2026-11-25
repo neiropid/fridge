@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Наш Холодильник</title>
+    <!-- Иконка для добавления на рабочий стол iOS/Android -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <style>
+        :root {
+            --bg: #F7F8FA;
+            --card-stock: #E8F5E9;
+            --card-stock-border: #A5D6A7;
+            --card-buy: #FFF3E0;
+            --card-buy-border: #FFCC80;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --danger: #EF4444;
+            --primary: #2563EB;
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            padding: 16px;
+            padding-bottom: 100px; /* место под кнопку сохранения */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #E5E7EB;
+            background: #FFFFFF;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--text-main);
+            color: #FFFFFF;
+            border-color: var(--text-main);
+        }
+
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Сетка карточек */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (min-width: 640px) {
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        }
+
+        @media (min-width: 1024px) {
+            .grid { grid-template-columns: repeat(5, 1fr); }
+        }
+
+        /* Карточка */
+        .card {
+            border-radius: var(--radius);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            border: 1.5px solid transparent;
+            position: relative;
+            background: #fff;
+        }
+
+        .card.in_stock {
+            background-color: var(--card-stock);
+            border-color: var(--card-stock-border);
+        }
+
+        .card.to_buy {
+            background-color: var(--card-buy);
+            border-color: var(--card-buy-border);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .icon {
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .status-toggle {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-main);
+        }
+
+        .title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        /* Управление объемом */
+        .amount-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 6px 8px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .amount-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: none;
+            background: #FFFFFF;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .amount-value {
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Срок годности */
+        .expiry {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .expiry.urgent {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .edit-link {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: underline;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        /* Плавающая панель сохранения */
+        .save-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150%);
+            background: #1F2937;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            width: 90%;
+            max-width: 420px;
+            justify-content: space-between;
+        }
+
+        .save-bar.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .save-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-confirm {
+            background: #10B981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: #9CA3AF;
+            border: 1px solid #4B5563;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* Модальное окно */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 200;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .modal h2 {
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .btn-delete {
+            background: #FEE2E2;
+            color: var(--danger);
+            border: none;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .loader {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🧊 Холодильник</h1>
+        <button class="add-btn" onclick="openModal()">+ Добавить продукт</button>
+    </header>
+
+    <div class="controls" style="margin-bottom: 20px;">
+        <button class="filter-btn active" onclick="setFilter('all', this)">Все</button>
+        <button class="filter-btn" onclick="setFilter('in_stock', this)">В наличии</button>
+        <button class="filter-btn" onclick="setFilter('to_buy', this)">Купить</button>
+    </div>
+
+    <div id="grid" class="grid">
+        <div class="loader">Загрузка продуктов...</div>
+    </div>
+
+    <!-- Плавающая панель подтверждения -->
+    <div id="saveBar" class="save-bar">
+        <span style="font-size: 14px; font-weight: 500;">Есть несохраненные правки</span>
+        <div class="save-actions">
+            <button class="btn-cancel" onclick="discardChanges()">Отмена</button>
+            <button class="btn-confirm" onclick="saveChanges()">Сохранить</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления/редактирования -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal">
+            <h2 id="modalTitle">Новый продукт</h2>
+            <input type="hidden" id="editId">
+            
+            <div class="form-group">
+                <label>Название</label>
+                <input type="text" id="itemName" placeholder="Например: Молоко" oninput="autoIcon()">
+            </div>
+
+            <div class="row">
+                <div class="form-group" style="width: 30%;">
+                    <label>Иконка</label>
+                    <input type="text" id="itemIcon" value="📦" style="text-align: center; font-size: 20px;">
+                </div>
+                <div class="form-group" style="width: 70%;">
+                    <label>Статус</label>
+                    <select id="itemStatus">
+                        <option value="in_stock">🟢 В холодильнике</option>
+                        <option value="to_buy">🟠 Нужно купить</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group" style="width: 50%;">
+                    <label>Количество</label>
+                    <input type="number" step="0.1" id="itemAmount" value="1">
+                </div>
+                <div class="form-group" style="width: 50%;">
+                    <label>Единица изм.</label>
+                    <select id="itemUnit">
+                        <option value="шт">шт</option>
+                        <option value="кг">кг</option>
+                        <option value="г">г</option>
+                        <option value="л">л</option>
+                        <option value="мл">мл</option>
+                        <option value="уп">уп</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Годен до (необязательно)</label>
+                <input type="date" id="itemExpiry">
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" id="deleteBtn" class="btn-delete" onclick="deleteItem()" style="display: none;">Удалить</button>
+                <div style="display: flex; gap: 8px; margin-left: auto;">
+                    <button type="button" class="filter-btn" onclick="closeModal()">Закрыть</button>
+                    <button type="button" class="add-btn" onclick="applyModal()">Готово</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // ВСТАВЬ СВОИ ДАННЫЕ ИЗ SUPABASE НИЖЕ:
+        // ==========================================
+        const SUPABASE_URL = 'https://apbcpdezonekluxbetwe.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_we-qWXWbsRl4G3BT4Jzm0g_jO5oVZ8p';
+        // ==========================================
+
+        let originalItems = [];
+        let draftItems = [];
+        let deletedIds = [];
+        let currentFilter = 'all';
+        let hasUnsavedChanges = false;
+
+        // Словарь автоподбора иконок
+        const iconMap = {
+            'молок': '🥛', 'яйц': '🥚', 'хлеб': '🍞', 'сыр': '🧀', 'мяс': '🥩',
+            'куриц': '🍗', 'рыб': '🐟', 'карто': '🥔', 'помид': '🍅', 'огур': '🥒',
+            'яблок': '🍎', 'банан': '🍌', 'вод': '💧', 'сок': '🧃', 'масл': '🧈',
+            'колбас': '🌭', 'сосис': '🌭', 'пельмен': '🥟', 'макарон': '🍝', 'рис': '🍚',
+            'греч': '🌾', 'чай': '🫖', 'кофе': '☕', 'сахар': '🧂', 'соль': '🧂',
+            'йогурт': '🍨', 'творог': '🥣', 'сметан': '🥣', 'лук': '🧅', 'чеснок': '🧄',
+            'морков': '🥕', 'капуст': '🥬', 'перец': '🫑', 'лимон': '🍋', 'шоколад': '🍫'
+        };
+
+        function autoIcon() {
+            const name = document.getElementById('itemName').value.toLowerCase();
+            for (let key in iconMap) {
+                if (name.includes(key)) {
+                    document.getElementById('itemIcon').value = iconMap[key];
+                    return;
+                }
+            }
+        }
+
+        // Загрузка данных из Supabase
+        async function fetchItems() {
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?select=*&order=id.asc`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                const data = await res.json();
+                originalItems = JSON.parse(JSON.stringify(data));
+                draftItems = JSON.parse(JSON.stringify(data));
+                deletedIds = [];
+                setUnsaved(false);
+                render();
+            } catch (e) {
+                document.getElementById('grid').innerHTML = '<div class="loader">Ошибка подключения к базе. Проверь ключи Supabase!</div>';
+            }
+        }
+
+        function setUnsaved(state) {
+            hasUnsavedChanges = state;
+            const bar = document.getElementById('saveBar');
+            if (state) bar.classList.add('visible');
+            else bar.classList.remove('visible');
+        }
+
+        function setFilter(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            render();
+        }
+
+        // Проверка срока годности
+        function checkExpiry(dateStr) {
+            if (!dateStr) return { text: 'Без срока', urgent: false };
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const exp = new Date(dateStr);
+            const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+            
+            const formatted = exp.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+            if (diffDays < 0) return { text: `Испорчено (${formatted})`, urgent: true };
+            if (diffDays <= 2) return { text: `До ${formatted} (!)`, urgent: true };
+            return { text: `До ${formatted}`, urgent: false };
+        }
+
+        // Отрисовка карточек
+        function render() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            const filtered = draftItems.filter(item => {
+                if (currentFilter === 'all') return true;
+                return item.status === currentFilter;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="loader" style="grid-column: 1/-1;">Список пуст</div>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const expInfo = checkExpiry(item.expiry);
+                const card = document.createElement('div');
+                card.className = `card ${item.status}`;
+                
+                const statusLabel = item.status === 'in_stock' ? '🟢 Есть' : '🟠 Купить';
+
+                card.innerHTML = `
+                    <div>
+                        <div class="card-header">
+                            <span class="icon">${item.icon || '📦'}</span>
+                            <button class="status-toggle" onclick="toggleStatus(${item.id})">${statusLabel}</button>
+                        </div>
+                        <div class="title">${item.name}</div>
+                    </div>
+                    <div>
+                        <div class="amount-box">
+                            <button class="amount-btn" onclick="changeAmount(${item.id}, -1)">−</button>
+                            <span class="amount-value" onclick="openModal(${item.id})">${item.amount} ${item.unit}</span>
+                            <button class="amount-btn" onclick="changeAmount(${item.id}, 1)">+</button>
+                        </div>
+                        <div class="expiry ${expInfo.urgent ? 'urgent' : ''}">
+                            <span>${expInfo.text}</span>
+                            <button class="edit-link" onclick="openModal(${item.id})">Изм.</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Быстрое изменение количества
+        function changeAmount(id, delta) {
+            const item = draftItems.find(i => i.id === id);
+            if (!item) return;
+            // Шаг изменения: если кг или л, то по 0.5, иначе по 1
+            const step = (item.unit === 'кг' || item.unit === 'л') ? 0.5 : 1;
+            let newVal = Math.round((item.amount + delta * step) * 10) / 10;
+            if (newVal < 0) newVal = 0;
+            item.amount = newVal;
+            
+            // Если стало 0, автоматически предлагаем перенести в "Купить"
+            if (newVal === 0 && item.status === 'in_stock') {
+                item.status = 'to_buy';
+            }
+            setUnsaved(true);
+            render();
+        }
+
+        // Быстрое переключение статуса
+        function toggleStatus(id) {
+            const item = draftItems.find(i => i.id === id);
+            if (!item) return;
+            item.status = item.status === 'in_stock' ? 'to_buy' : 'in_stock';
+            setUnsaved(true);
+            render();
+        }
+
+        // Модальное окно
+        function openModal(id = null) {
+            const overlay = document.getElementById('modalOverlay');
+            const deleteBtn = document.getElementById('deleteBtn');
+            
+            if (id) {
+                const item = draftItems.find(i => i.id === id);
+                document.getElementById('modalTitle').innerText = 'Редактировать';
+                document.getElementById('editId').value = item.id;
+                document.getElementById('itemName').value = item.name;
+                document.getElementById('itemIcon').value = item.icon;
+                document.getElementById('itemStatus').value = item.status;
+                document.getElementById('itemAmount').value = item.amount;
+                document.getElementById('itemUnit').value = item.unit;
+                document.getElementById('itemExpiry').value = item.expiry || '';
+                deleteBtn.style.display = 'block';
+            } else {
+                document.getElementById('modalTitle').innerText = 'Новый продукт';
+                document.getElementById('editId').value = '';
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemIcon').value = '📦';
+                document.getElementById('itemStatus').value = 'in_stock';
+                document.getElementById('itemAmount').value = '1';
+                document.getElementById('itemUnit').value = 'шт';
+                document.getElementById('itemExpiry').value = '';
+                deleteBtn.style.display = 'none';
+            }
+            overlay.classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('open');
+        }
+
+        function applyModal() {
+            const idVal = document.getElementById('editId').value;
+            const name = document.getElementById('itemName').value.trim();
+            if (!name) return alert('Введи название продукта');
+
+            const itemData = {
+                name: name,
+                icon: document.getElementById('itemIcon').value || '📦',
+                status: document.getElementById('itemStatus').value,
+                amount: parseFloat(document.getElementById('itemAmount').value) || 0,
+                unit: document.getElementById('itemUnit').value,
+                expiry: document.getElementById('itemExpiry').value || null
+            };
+
+            if (idVal) {
+                const index = draftItems.findIndex(i => i.id == idVal);
+                draftItems[index] = { ...draftItems[index], ...itemData };
+            } else {
+                // Временный отрицательный ID для новых элементов до сохранения в БД
+                itemData.id = -Date.now();
+                itemData.isNew = true;
+                draftItems.push(itemData);
+            }
+
+            setUnsaved(true);
+            closeModal();
+            render();
+        }
+
+        function deleteItem() {
+            const idVal = parseInt(document.getElementById('editId').value);
+            if (idVal > 0) deletedIds.push(idVal);
+            draftItems = draftItems.filter(i => i.id !== idVal);
+            setUnsaved(true);
+            closeModal();
+            render();
+        }
+
+        // Отмена изменений
+        function discardChanges() {
+            draftItems = JSON.parse(JSON.stringify(originalItems));
+            deletedIds = [];
+            setUnsaved(false);
+            render();
+        }
+
+        // Сохранение в облако Supabase
+        async function saveChanges() {
+            const btn = document.querySelector('.btn-confirm');
+            btn.innerText = 'Сохранение...';
+            btn.disabled = true;
+
+            try {
+                // 1. Удаляем удаленные
+                for (let id of deletedIds) {
+                    await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${id}`, {
+                        method: 'DELETE',
+                        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                    });
+                }
+
+                // 2. Обновляем существующие и добавляем новые
+                for (let item of draftItems) {
+                    const payload = {
+                        name: item.name,
+                        icon: item.icon,
+                        status: item.status,
+                        amount: item.amount,
+                        unit: item.unit,
+                        expiry: item.expiry
+                    };
+
+                    if (item.isNew) {
+                        await fetch(`${SUPABASE_URL}/rest/v1/fridge_items`, {
+                            method: 'POST',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${item.id}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                    }
+                }
+
+                await fetchItems();
+            } catch (e) {
+                alert('Ошибка при сохранении!');
+            } finally {
+                btn.innerText = 'Сохранить';
+                btn.disabled = false;
+            }
+        }
+
+        // Старт
+        fetchItems();
+    </script>
+</body>
+</html>
