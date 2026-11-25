@@ -111,6 +111,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
         .theme-btn {
@@ -717,6 +718,7 @@
     <header>
         <h1>🧊 Холодильник</h1>
         <div class="header-actions">
+            <button id="syncBtn" class="theme-btn" type="button" onclick="fetchItems(true)">🔄 Обновить</button>
             <button id="themeBtn" class="theme-btn" type="button" onclick="toggleTheme()">🌙 Тёмная</button>
             <button class="add-btn" type="button" onclick="openCreateModal()">+ Свой продукт</button>
         </div>
@@ -831,8 +833,39 @@
     </div>
 
     <script>
-        const SUPABASE_URL = 'https://apbcpdezonelduxbetwe.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_we-qWXWbsR14G3BT4Jzm0g_j05oVZ8p';
+        const JSONBLOB_STORAGE_KEY = 'fridge_jsonblob_id_v1';
+        let activeBlobId = '';
+
+        function getBlobId() {
+            const params = new URLSearchParams(window.location.search);
+            const fromUrl = (params.get('blob') || '').trim();
+            if (fromUrl) {
+                activeBlobId = fromUrl;
+                try { localStorage.setItem(JSONBLOB_STORAGE_KEY, fromUrl); } catch (_) {}
+                return activeBlobId;
+            }
+            if (activeBlobId) return activeBlobId;
+            try {
+                const saved = (localStorage.getItem(JSONBLOB_STORAGE_KEY) || '').trim();
+                if (saved) {
+                    activeBlobId = saved;
+                    return activeBlobId;
+                }
+            } catch (_) {}
+            return '';
+        }
+
+        function setBlobId(id) {
+            activeBlobId = String(id || '').trim();
+            if (!activeBlobId) return;
+            try { localStorage.setItem(JSONBLOB_STORAGE_KEY, activeBlobId); } catch (_) {}
+            try {
+                const url = new URL(window.location.href);
+                url.searchParams.set('blob', activeBlobId);
+                window.history.replaceState({}, '', url.toString());
+            } catch (_) {}
+        }
+
         const THEME_STORAGE_KEY = 'fridge_device_theme_v1';
         const CACHE_STORAGE_KEY = 'fridge_items_cache_v1';
 
@@ -939,7 +972,6 @@
 
         let originalItems = [];
         let draftItems = [];
-        let deletedIds = [];
         let currentTab = 'in_stock';
         let currentSubcat = 'all';
         let searchQuery = '';
@@ -1028,13 +1060,11 @@
         }
 
         function normalizeItem(raw) {
-            const isVirtualDefault = Number(raw.id) < -100;
             const resolvedArt = raw.icon && SVG_ART[raw.icon]
                 ? raw.icon
                 : (raw.art && SVG_ART[raw.art] ? raw.art : detectArtByName(raw.name));
             return {
                 id: raw.id,
-                isNew: Boolean(raw.isNew || isVirtualDefault),
                 name: capitalizeFirst(raw.name || 'Без названия'),
                 icon: resolvedArt,
                 amount: Number(raw.amount) || 0,
@@ -1122,7 +1152,7 @@
                 if (target) {
                     target.status = 'to_buy';
                     target.amount = restoreAmount > 0 ? restoreAmount : 1;
-                    setUnsaved(true, 'Есть несохранённые правки');
+                    setUnsaved(true);
                     render();
                 }
                 removeToast(toastObj, false);
@@ -1144,54 +1174,48 @@
             }, TOAST_DURATION_MS);
         }
 
-        function loadFallbackCatalog(keepUnsaved = false, msg = 'Есть несохранённые правки') {
-            const cached = readLocalCache();
-            const base = mergeCatalogWithItems(cached || DEFAULT_CATALOG.map(normalizeItem));
-            originalItems = JSON.parse(JSON.stringify(base));
-            draftItems = JSON.parse(JSON.stringify(base));
-            deletedIds = [];
-            clearAllToasts();
-            setUnsaved(keepUnsaved, msg);
-            render();
-        }
+        async function fetchItems(manual = false) {
+            if (hasUnsavedChanges && !manual) return;
 
-        async function fetchItems() {
+            const syncBtn = document.getElementById('syncBtn');
+            if (manual && syncBtn) syncBtn.innerText = '⏳...';
+
             const cached = readLocalCache();
-            if (cached) {
-                const mergedCached = mergeCatalogWithItems(cached);
-                originalItems = JSON.parse(JSON.stringify(mergedCached));
-                draftItems = JSON.parse(JSON.stringify(mergedCached));
+            if (draftItems.length === 0) {
+                const base = mergeCatalogWithItems(cached || []);
+                originalItems = JSON.parse(JSON.stringify(base));
+                draftItems = JSON.parse(JSON.stringify(base));
                 render();
             }
 
+            const blobId = getBlobId();
+            if (!blobId) {
+                if (syncBtn) syncBtn.innerText = '🔄 Обновить';
+                return;
+            }
+
             try {
-                const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 5000);
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?select=*&order=id.asc`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    },
-                    signal: controller.signal
+                const res = await fetch(`https://jsonblob.com/api/jsonBlob/${blobId}?t=${Date.now()}`, {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store'
                 });
-                clearTimeout(timer);
-                if (!res.ok) throw new Error('HTTP');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
-                if (!Array.isArray(data) || data.length === 0) {
-                    if (!cached) loadFallbackCatalog(false);
-                    return;
-                }
+                if (!Array.isArray(data)) throw new Error('Bad JSON');
 
                 const normalized = mergeCatalogWithItems(data.map(normalizeItem));
                 originalItems = JSON.parse(JSON.stringify(normalized));
                 draftItems = JSON.parse(JSON.stringify(normalized));
-                deletedIds = [];
                 writeLocalCache(normalized);
                 clearAllToasts();
                 setUnsaved(false);
                 render();
             } catch (_) {
-                if (!cached) loadFallbackCatalog(false);
+                if (manual) {
+                    setUnsaved(true, 'Не удалось загрузить облако — проверь сеть/VPN');
+                }
+            } finally {
+                if (syncBtn) syncBtn.innerText = '🔄 Обновить';
             }
         }
 
@@ -1350,13 +1374,13 @@
                 item.status = 'catalog';
                 item.expiry = null;
                 spawnDepletedToast(item.id, item.name, prevAmount > 0 ? prevAmount : 1);
-                setUnsaved(true, 'Есть несохранённые правки');
+                setUnsaved(true);
                 render();
                 return;
             }
 
             item.amount = nextVal;
-            setUnsaved(true, 'Есть несохранённые правки');
+            setUnsaved(true);
             render();
         }
 
@@ -1364,7 +1388,7 @@
             const item = draftItems.find(i => i.id === id);
             if (!item) return;
             item.status = 'catalog';
-            setUnsaved(true, 'Есть несохранённые правки');
+            setUnsaved(true);
             render();
         }
 
@@ -1426,7 +1450,7 @@
                 item.expiry = expVal || null;
             }
 
-            setUnsaved(true, 'Есть несохранённые правки');
+            setUnsaved(true);
             closeActionModal();
             render();
         }
@@ -1454,7 +1478,6 @@
 
             draftItems.push({
                 id: -Date.now(),
-                isNew: true,
                 name,
                 icon: art,
                 amount: amount > 0 ? amount : 1,
@@ -1463,34 +1486,47 @@
                 expiry: null
             });
 
-            setUnsaved(true, 'Есть несохранённые правки');
+            setUnsaved(true);
             closeCreateModal();
             render();
         }
 
         function discardChanges() {
             draftItems = JSON.parse(JSON.stringify(originalItems));
-            deletedIds = [];
             writeLocalCache(originalItems);
             clearAllToasts();
             setUnsaved(false);
             render();
         }
 
-        async function sendWithRetry(url, options, attempts = 2) {
-            for (let i = 0; i < attempts; i++) {
+        async function createBlobIfNeeded(payloadArr) {
+            let blobId = getBlobId();
+            if (blobId) return blobId;
+
+            const res = await fetch('https://jsonblob.com/api/jsonBlob', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payloadArr)
+            });
+            if (!res.ok) throw new Error(`POST ${res.status}`);
+
+            const loc = res.headers.get('Location') || res.headers.get('X-Jsonblob-Id') || '';
+            const match = loc.match(/([a-zA-Z0-9_-]{8,})$/);
+            if (match && match[1]) {
+                blobId = match[1];
+            } else {
                 try {
-                    const controller = new AbortController();
-                    const timer = setTimeout(() => controller.abort(), 5000);
-                    const res = await fetch(url, { ...options, signal: controller.signal });
-                    clearTimeout(timer);
-                    if (res.ok) return res;
-                    if (i === attempts - 1) return res;
-                } catch (err) {
-                    if (i === attempts - 1) throw err;
-                }
-                await new Promise(r => setTimeout(r, 400));
+                    const data = await res.json();
+                    if (data && data.id) blobId = String(data.id);
+                } catch (_) {}
             }
+
+            if (!blobId) throw new Error('No ID');
+            setBlobId(blobId);
+            return blobId;
         }
 
         async function saveChanges() {
@@ -1499,89 +1535,51 @@
             btn.innerText = 'Сохранение...';
             writeLocalCache(draftItems);
 
-            const headers = {
-                'apikey': SUPABASE_KEY,
-                'Authorization': `Bearer ${SUPABASE_KEY}`,
-                'Content-Type': 'application/json'
-            };
+            const activeOrCustom = draftItems.filter(i => i.status !== 'catalog' || Number(i.id) <= -200 || Number(i.id) > 0);
 
-            let allOk = true;
-            let errInfo = '';
-
-            try {
-                for (const id of deletedIds) {
-                    if (Number(id) > 0) {
-                        const delRes = await sendWithRetry(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${id}`, {
-                            method: 'DELETE',
-                            headers
-                        });
-                        if (!delRes || !delRes.ok) {
-                            allOk = false;
-                            errInfo = `DEL ${delRes ? delRes.status : 'сеть'}`;
-                        }
+            let savedOk = false;
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    const existingId = getBlobId();
+                    if (!existingId) {
+                        await createBlobIfNeeded(activeOrCustom);
+                        savedOk = true;
+                        break;
                     }
-                }
-
-                for (const item of draftItems) {
-                    if (item.status === 'catalog' && item.isNew) continue;
-                    const payload = {
-                        name: capitalizeFirst(item.name),
-                        icon: item.icon,
-                        amount: item.amount,
-                        unit: item.unit,
-                        status: item.status,
-                        expiry: item.expiry
-                    };
-
-                    if (item.isNew || Number(item.id) < 0) {
-                        const postRes = await sendWithRetry(`${SUPABASE_URL}/rest/v1/fridge_items`, {
-                            method: 'POST',
-                            headers: { ...headers, 'Prefer': 'return=representation' },
-                            body: JSON.stringify(payload)
-                        });
-                        if (postRes && postRes.ok) {
-                            const created = await postRes.json();
-                            if (Array.isArray(created) && created[0] && created[0].id) {
-                                item.id = created[0].id;
-                                item.isNew = false;
-                            }
-                        } else {
-                            allOk = false;
-                            errInfo = `POST ${postRes ? postRes.status : 'сеть'}`;
-                        }
-                    } else {
-                        const patchRes = await sendWithRetry(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${item.id}`, {
-                            method: 'PATCH',
-                            headers,
-                            body: JSON.stringify(payload)
-                        });
-                        if (!patchRes || !patchRes.ok) {
-                            allOk = false;
-                            errInfo = `PATCH ${patchRes ? patchRes.status : 'сеть'}`;
-                        }
+                    const res = await fetch(`https://jsonblob.com/api/jsonBlob/${existingId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(activeOrCustom)
+                    });
+                    if (res.ok) {
+                        savedOk = true;
+                        break;
                     }
-                }
-
-                writeLocalCache(draftItems);
-
-                if (allOk) {
-                    deletedIds = [];
-                    originalItems = JSON.parse(JSON.stringify(draftItems));
-                    clearAllToasts();
-                    setUnsaved(false);
-                } else {
-                    setUnsaved(true, `В облако не ушло (${errInfo}) — нажми Сохранить`);
-                }
-            } catch (_) {
-                setUnsaved(true, 'В облако не ушло — проверь сеть/VPN и нажми Сохранить');
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Сохранить';
+                } catch (_) {}
+                await new Promise(r => setTimeout(r, 350));
             }
+
+            if (savedOk) {
+                originalItems = JSON.parse(JSON.stringify(draftItems));
+                clearAllToasts();
+                setUnsaved(false);
+            } else {
+                setUnsaved(true, 'В облако не ушло — проверь сеть/VPN и нажми Сохранить');
+            }
+
+            btn.disabled = false;
+            btn.innerText = 'Сохранить';
         }
 
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) fetchItems(false);
+        });
+
         initTheme();
-        fetchItems();
+        fetchItems(false);
     </script>
 </body>
 </html>
