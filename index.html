@@ -4,21 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Наш Холодильник</title>
-    <!-- Иконка для добавления на рабочий стол iOS/Android -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <style>
         :root {
-            --bg: #F7F8FA;
+            --bg: #F6F7F9;
+            --surface: #FFFFFF;
             --card-stock: #E8F5E9;
-            --card-stock-border: #A5D6A7;
+            --card-stock-border: #9CCC9E;
             --card-buy: #FFF3E0;
-            --card-buy-border: #FFCC80;
-            --text-main: #1F2937;
+            --card-buy-border: #FFB74D;
+            --card-catalog: #FFFFFF;
+            --card-catalog-border: #E5E7EB;
+            --text-main: #18181B;
             --text-muted: #6B7280;
-            --danger: #EF4444;
+            --danger: #DC2626;
             --primary: #2563EB;
-            --radius: 16px;
+            --success: #059669;
+            --radius: 18px;
         }
 
         * {
@@ -33,8 +36,8 @@
             background-color: var(--bg);
             color: var(--text-main);
             padding: 16px;
-            padding-bottom: 100px; /* место под кнопку сохранения */
-            max-width: 1200px;
+            padding-bottom: 120px;
+            max-width: 1240px;
             margin: 0 auto;
         }
 
@@ -42,58 +45,217 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
             gap: 12px;
+            margin-bottom: 14px;
         }
 
         h1 {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
         }
 
-        .controls {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-            max-width: 450px;
-        }
-
-        .filter-btn {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #E5E7EB;
-            background: #FFFFFF;
-            border-radius: 12px;
+        .add-btn {
+            background: var(--primary);
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 14px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tab-btn {
+            min-height: 46px;
+            border: 1.5px solid #E5E7EB;
+            background: var(--surface);
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 700;
             color: var(--text-muted);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
         }
 
-        .filter-btn.active {
+        .tab-btn.active {
             background: var(--text-main);
             color: #FFFFFF;
             border-color: var(--text-main);
         }
 
-        .add-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        .search-wrap {
+            position: relative;
+            margin-bottom: 12px;
         }
 
-        /* Сетка карточек */
+        .search-input {
+            width: 100%;
+            min-height: 46px;
+            padding: 10px 40px 10px 14px;
+            border-radius: 14px;
+            border: 1.5px solid #E5E7EB;
+            background: var(--surface);
+            font-size: 15px;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #F3F4F6;
+            color: var(--text-muted);
+            border-radius: 999px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: none;
+        }
+
+        .search-clear.visible {
+            display: block;
+        }
+
+        .subcats {
+            display: none;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 14px;
+            scrollbar-width: none;
+        }
+
+        .subcats::-webkit-scrollbar {
+            display: none;
+        }
+
+        .subcats.visible {
+            display: flex;
+        }
+
+        .subcat-btn {
+            flex: 0 0 auto;
+            min-height: 38px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid #D1D5DB;
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .subcat-btn.active {
+            background: #2563EB;
+            color: #FFFFFF;
+            border-color: #2563EB;
+        }
+
+        /* Каскад компактных тостов с таймером сверху */
+        .toast-stack {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            left: 12px;
+            z-index: 150;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        @media (min-width: 640px) {
+            .toast-stack {
+                left: auto;
+                width: 340px;
+            }
+        }
+
+        .toast-item {
+            pointer-events: auto;
+            position: relative;
+            overflow: hidden;
+            background: #FFFFFF;
+            border: 1.5px solid #F59E0B;
+            border-radius: 14px;
+            padding: 10px 12px 14px 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            transform: translateX(24px);
+            opacity: 0;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+        }
+
+        .toast-item.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-item.leaving {
+            transform: translateY(-18px);
+            opacity: 0;
+        }
+
+        .toast-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.25;
+        }
+
+        .toast-yes {
+            min-height: 34px;
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: none;
+            background: #D97706;
+            color: #FFFFFF;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .toast-timer-track {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 4px;
+            background: #FEF3C7;
+        }
+
+        .toast-timer-bar {
+            height: 100%;
+            width: 100%;
+            background: #F59E0B;
+            transform-origin: left center;
+            transition: transform linear;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -101,24 +263,23 @@
         }
 
         @media (min-width: 640px) {
-            .grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
         }
 
         @media (min-width: 1024px) {
-            .grid { grid-template-columns: repeat(5, 1fr); }
+            .grid { grid-template-columns: repeat(5, 1fr); gap: 16px; }
         }
 
-        /* Карточка */
         .card {
             border-radius: var(--radius);
-            padding: 16px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            border: 1.5px solid transparent;
+            border: 1.5px solid var(--card-catalog-border);
+            background: var(--card-catalog);
             position: relative;
-            background: #fff;
+            min-height: 185px;
         }
 
         .card.in_stock {
@@ -131,112 +292,176 @@
             border-color: var(--card-buy-border);
         }
 
-        .card-header {
+        .card.expired_card {
+            border-color: #F87171;
+            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.25);
+        }
+
+        .card-top {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 8px;
             margin-bottom: 10px;
         }
 
-        .icon {
-            font-size: 36px;
-            line-height: 1;
-        }
-
-        .status-toggle {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            padding: 4px 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: none;
-            background: rgba(255, 255, 255, 0.8);
-            color: var(--text-main);
-        }
-
-        .title {
-            font-size: 17px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            word-break: break-word;
-        }
-
-        /* Управление объемом */
-        .amount-box {
+        .art-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.85);
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            background: rgba(255, 255, 255, 0.7);
-            padding: 6px 8px;
-            border-radius: 10px;
-            margin-bottom: 8px;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 1px solid rgba(0, 0, 0, 0.06);
         }
 
-        .amount-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            border: none;
-            background: #FFFFFF;
-            font-size: 18px;
-            font-weight: 600;
+        .art-box svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        .del-x-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            border: 1px solid rgba(220, 38, 38, 0.25);
+            background: rgba(255, 255, 255, 0.92);
+            color: var(--danger);
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        .amount-value {
-            font-size: 15px;
-            font-weight: 600;
+        .badge-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 8px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text-muted);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .catalog-pick-btn {
+            width: 100%;
+            min-height: 42px;
+            border-radius: 12px;
+            border: none;
+            background: #EFF6FF;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 700;
             cursor: pointer;
+            margin-top: 6px;
         }
 
-        /* Срок годности */
-        .expiry {
+        .amount-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.82);
+            padding: 6px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .step-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid #E5E7EB;
+            background: #FFFFFF;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .amount-text {
+            font-size: 14px;
+            font-weight: 800;
+            text-align: center;
+            cursor: pointer;
+            padding: 4px;
+            flex: 1;
+        }
+
+        .edit-vol-btn {
+            min-height: 36px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid #D1D5DB;
+            background: #FFFFFF;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .expiry-line {
             font-size: 12px;
             color: var(--text-muted);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 4px;
+            gap: 6px;
+            margin-bottom: 8px;
         }
 
-        .expiry.urgent {
+        .expiry-line.urgent {
             color: var(--danger);
-            font-weight: 700;
+            font-weight: 800;
         }
 
-        .edit-link {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-decoration: underline;
-            cursor: pointer;
-            background: none;
+        .bought-btn {
+            width: 100%;
+            min-height: 42px;
+            border-radius: 12px;
             border: none;
+            background: var(--success);
+            color: #FFFFFF;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
         }
 
-        /* Плавающая панель сохранения */
         .save-bar {
             position: fixed;
-            bottom: 20px;
+            bottom: 16px;
             left: 50%;
-            transform: translateX(-50%) translateY(150%);
-            background: #1F2937;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
+            transform: translateX(-50%) translateY(160%);
+            background: #18181B;
+            color: #FFFFFF;
+            padding: 12px 16px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
-            gap: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
-            width: 90%;
-            max-width: 420px;
             justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+            transition: transform 0.25s ease;
+            z-index: 100;
+            width: calc(100% - 24px);
+            max-width: 460px;
         }
 
         .save-bar.visible {
@@ -249,35 +474,38 @@
         }
 
         .btn-confirm {
-            background: #10B981;
-            color: white;
-            border: none;
+            min-height: 40px;
             padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            background: #10B981;
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
         }
 
         .btn-cancel {
-            background: transparent;
-            color: #9CA3AF;
-            border: 1px solid #4B5563;
+            min-height: 40px;
             padding: 8px 12px;
-            border-radius: 20px;
+            border-radius: 12px;
+            border: 1px solid #52525B;
+            background: transparent;
+            color: #E4E4E7;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
         }
 
-        /* Модальное окно */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
             display: none;
             align-items: center;
             justify-content: center;
             padding: 16px;
             z-index: 200;
-            backdrop-filter: blur(2px);
         }
 
         .modal-overlay.open {
@@ -285,16 +513,18 @@
         }
 
         .modal {
-            background: white;
-            padding: 24px;
-            border-radius: 20px;
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 22px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal h2 {
-            margin-bottom: 16px;
-            font-size: 20px;
+            font-size: 19px;
+            margin-bottom: 14px;
         }
 
         .form-group {
@@ -304,106 +534,185 @@
         .form-group label {
             display: block;
             font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #D1D5DB;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-
-        .row {
-            display: flex;
-            gap: 10px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            gap: 10px;
-        }
-
-        .btn-delete {
-            background: #FEE2E2;
-            color: var(--danger);
-            border: none;
-            padding: 10px 14px;
-            border-radius: 10px;
             font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            min-height: 44px;
+            padding: 10px 12px;
+            border: 1.5px solid #D1D5DB;
+            border-radius: 12px;
+            font-size: 15px;
+            color: var(--text-main);
+            background: #FFFFFF;
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .modal-foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-secondary {
+            min-height: 44px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid #D1D5DB;
+            background: #FFFFFF;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
         }
 
-        .loader {
+        .empty-state {
+            grid-column: 1 / -1;
             text-align: center;
-            padding: 40px;
+            padding: 40px 16px;
             color: var(--text-muted);
+            font-size: 15px;
         }
     </style>
 </head>
 <body>
 
+    <div id="toastStack" class="toast-stack"></div>
+
     <header>
         <h1>🧊 Холодильник</h1>
-        <button class="add-btn" onclick="openModal()">+ Добавить продукт</button>
+        <button class="add-btn" onclick="openCreateModal()">+ Свой продукт</button>
     </header>
 
-    <div class="controls" style="margin-bottom: 20px;">
-        <button class="filter-btn active" onclick="setFilter('all', this)">Все</button>
-        <button class="filter-btn" onclick="setFilter('in_stock', this)">В наличии</button>
-        <button class="filter-btn" onclick="setFilter('to_buy', this)">Купить</button>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="in_stock" onclick="switchTab('in_stock')">В холодильнике</button>
+        <button class="tab-btn" data-tab="to_buy" onclick="switchTab('to_buy')">Купить</button>
+        <button class="tab-btn" data-tab="catalog" onclick="switchTab('catalog')">Все</button>
+    </div>
+
+    <div class="search-wrap">
+        <input id="searchInput" class="search-input" type="search" placeholder="Поиск продукта в текущем разделе..." oninput="handleSearch()">
+        <button id="searchClear" class="search-clear" onclick="clearSearch()">×</button>
+    </div>
+
+    <div id="subcats" class="subcats">
+        <button class="subcat-btn active" data-sub="all" onclick="setSubcat('all')">Все</button>
+        <button class="subcat-btn" data-sub="meat" onclick="setSubcat('meat')">Мясо</button>
+        <button class="subcat-btn" data-sub="dairy" onclick="setSubcat('dairy')">Молочка</button>
+        <button class="subcat-btn" data-sub="produce" onclick="setSubcat('produce')">Овощи и фрукты</button>
+        <button class="subcat-btn" data-sub="pantry" onclick="setSubcat('pantry')">Бакалея и соусы</button>
+        <button class="subcat-btn" data-sub="other" onclick="setSubcat('other')">Разное</button>
     </div>
 
     <div id="grid" class="grid">
-        <div class="loader">Загрузка продуктов...</div>
+        <div class="empty-state">Загрузка данных...</div>
     </div>
 
-    <!-- Плавающая панель подтверждения -->
     <div id="saveBar" class="save-bar">
-        <span style="font-size: 14px; font-weight: 500;">Есть несохраненные правки</span>
+        <span style="font-size: 14px; font-weight: 700;">Есть несохранённые правки</span>
         <div class="save-actions">
             <button class="btn-cancel" onclick="discardChanges()">Отмена</button>
             <button class="btn-confirm" onclick="saveChanges()">Сохранить</button>
         </div>
     </div>
 
-    <!-- Модальное окно добавления/редактирования -->
-    <div id="modalOverlay" class="modal-overlay">
+    <!-- Модалка объёма и срока годности -->
+    <div id="actionModal" class="modal-overlay">
         <div class="modal">
-            <h2 id="modalTitle">Новый продукт</h2>
-            <input type="hidden" id="editId">
-            
-            <div class="form-group">
-                <label>Название</label>
-                <input type="text" id="itemName" placeholder="Например: Молоко" oninput="autoIcon()">
-            </div>
+            <h2 id="actionTitle">Параметры продукта</h2>
+            <input type="hidden" id="actionItemId">
+            <input type="hidden" id="actionMode">
 
-            <div class="row">
-                <div class="form-group" style="width: 30%;">
-                    <label>Иконка</label>
-                    <input type="text" id="itemIcon" value="📦" style="text-align: center; font-size: 20px;">
+            <div class="row-2">
+                <div class="form-group">
+                    <label>Количество</label>
+                    <input type="number" step="0.1" min="0" id="actionAmount">
                 </div>
-                <div class="form-group" style="width: 70%;">
-                    <label>Статус</label>
-                    <select id="itemStatus">
-                        <option value="in_stock">🟢 В холодильнике</option>
-                        <option value="to_buy">🟠 Нужно купить</option>
+                <div class="form-group">
+                    <label>Единица измерения</label>
+                    <select id="actionUnit">
+                        <option value="шт">шт</option>
+                        <option value="кг">кг</option>
+                        <option value="г">г</option>
+                        <option value="л">л</option>
+                        <option value="мл">мл</option>
+                        <option value="уп">уп</option>
                     </select>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="form-group" style="width: 50%;">
-                    <label>Количество</label>
-                    <input type="number" step="0.1" id="itemAmount" value="1">
+            <div id="expiryField" class="form-group">
+                <label>Годен до</label>
+                <input type="date" id="actionExpiry">
+            </div>
+
+            <div class="modal-foot">
+                <button type="button" class="btn-secondary" onclick="closeActionModal()">Отмена</button>
+                <button type="button" class="add-btn" onclick="confirmActionModal()">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка создания своего продукта -->
+    <div id="createModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Новый продукт в каталог</h2>
+
+            <div class="form-group">
+                <label>Название</label>
+                <input type="text" id="newName" placeholder="Например: Фарш говяжий или Кетчуп" oninput="autoPickArt()">
+            </div>
+
+            <div class="row-2">
+                <div class="form-group">
+                    <label>Подкатегория в «Все»</label>
+                    <select id="newSubcat">
+                        <option value="meat">Мясо</option>
+                        <option value="dairy">Молочка</option>
+                        <option value="produce">Овощи и фрукты</option>
+                        <option value="pantry">Бакалея и соусы</option>
+                        <option value="other">Разное</option>
+                    </select>
                 </div>
-                <div class="form-group" style="width: 50%;">
-                    <label>Единица изм.</label>
-                    <select id="itemUnit">
+                <div class="form-group">
+                    <label>Картинка</label>
+                    <select id="newArt">
+                        <option value="beef">Корова (говядина)</option>
+                        <option value="pork">Свинья (свинина)</option>
+                        <option value="chicken">Курица / птица</option>
+                        <option value="mince">Фарш</option>
+                        <option value="fish">Рыба</option>
+                        <option value="milk">Молоко</option>
+                        <option value="eggs">Яйца</option>
+                        <option value="cheese">Сыр</option>
+                        <option value="butter">Масло</option>
+                        <option value="ketchup">Кетчуп / соус</option>
+                        <option value="spice">Специи / приправы</option>
+                        <option value="veg">Овощи / фрукты</option>
+                        <option value="grain">Крупы / макароны</option>
+                        <option value="bread">Хлеб / выпечка</option>
+                        <option value="drink">Напитки</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row-2">
+                <div class="form-group">
+                    <label>Объём по умолчанию</label>
+                    <input type="number" step="0.1" min="0" id="newAmount" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Единица измерения</label>
+                    <select id="newUnit">
                         <option value="шт">шт</option>
                         <option value="кг">кг</option>
                         <option value="г">г</option>
@@ -415,56 +724,206 @@
             </div>
 
             <div class="form-group">
-                <label>Годен до (необязательно)</label>
-                <input type="date" id="itemExpiry">
+                <label>Куда добавить сразу</label>
+                <select id="newTarget">
+                    <option value="catalog">Только в каталог «Все»</option>
+                    <option value="to_buy">Сразу в «Купить»</option>
+                    <option value="in_stock">Сразу в «В холодильнике»</option>
+                </select>
             </div>
 
-            <div class="modal-buttons">
-                <button type="button" id="deleteBtn" class="btn-delete" onclick="deleteItem()" style="display: none;">Удалить</button>
-                <div style="display: flex; gap: 8px; margin-left: auto;">
-                    <button type="button" class="filter-btn" onclick="closeModal()">Закрыть</button>
-                    <button type="button" class="add-btn" onclick="applyModal()">Готово</button>
-                </div>
+            <div class="modal-foot">
+                <button type="button" class="btn-secondary" onclick="closeCreateModal()">Отмена</button>
+                <button type="button" class="add-btn" onclick="createCustomItem()">Добавить</button>
             </div>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // ВСТАВЬ СВОИ ДАННЫЕ ИЗ SUPABASE НИЖЕ:
-        // ==========================================
-        const SUPABASE_URL = 'https://apbcpdezonekluxbetwe.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_we-qWXWbsRl4G3BT4Jzm0g_jO5oVZ8p';
-        // ==========================================
+        const SUPABASE_URL = 'https://apbcpdezonelduxbetwe.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_we-qWXWbsR14G3BT4Jzm0g_j05oVZ8p';
+
+        const MAX_TOASTS = 3;
+        const TOAST_DURATION_MS = 7000;
+
+        const SVG_ART = {
+            beef: `<svg viewBox="0 0 36 36" fill="none"><rect x="6" y="13" width="22" height="13" rx="5" fill="#B45309"/><circle cx="27" cy="15" r="5" fill="#92400E"/><circle cx="29" cy="14" r="1.2" fill="#FFF"/><path d="M24 10L22 7M30 10L32 7" stroke="#78350F" stroke-width="2" stroke-linecap="round"/><path d="M9 26V30M13 26V30M23 26V30M26 26V30" stroke="#78350F" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+            pork: `<svg viewBox="0 0 36 36" fill="none"><rect x="7" y="13" width="20" height="13" rx="6" fill="#F472B6"/><circle cx="26" cy="16" r="4.5" fill="#EC4899"/><ellipse cx="29.5" cy="16.5" rx="2" ry="1.5" fill="#FBCFE8"/><path d="M24 11L23 8M27 11L28 8" stroke="#DB2777" stroke-width="2" stroke-linecap="round"/><path d="M10 26V30M23 26V30" stroke="#DB2777" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+            chicken: `<svg viewBox="0 0 36 36" fill="none"><ellipse cx="16" cy="19" rx="10" ry="7.5" fill="#F59E0B"/><path d="M24 16L31 12L29 19L24 20Z" fill="#EA580C"/><circle cx="27" cy="15" r="1.2" fill="#FFF"/><path d="M12 26.5V30M18 26.5V30" stroke="#B45309" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+            mince: `<svg viewBox="0 0 36 36" fill="none"><circle cx="13" cy="16" r="4.5" fill="#E11D48"/><circle cx="20" cy="14" r="5" fill="#F43F5E"/><circle cx="24" cy="19" r="4.5" fill="#BE123C"/><circle cx="16" cy="22" r="5" fill="#FB7185"/><circle cx="11" cy="22" r="3.5" fill="#E11D48"/></svg>`,
+            fish: `<svg viewBox="0 0 36 36" fill="none"><path d="M7 18C11 12 19 12 25 18C19 24 11 24 7 18Z" fill="#38BDF8"/><path d="M25 18L31 13V23L25 18Z" fill="#0284C7"/><circle cx="12" cy="17" r="1.4" fill="#0F172A"/></svg>`,
+            milk: `<svg viewBox="0 0 36 36" fill="none"><path d="M12 11L15 6H21L24 11V29H12V11Z" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/><rect x="14" y="16" width="8" height="7" rx="1.5" fill="#93C5FD"/></svg>`,
+            eggs: `<svg viewBox="0 0 36 36" fill="none"><ellipse cx="13.5" cy="19" rx="6.5" ry="8.5" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/><ellipse cx="22.5" cy="20" rx="6" ry="7.5" fill="#FDE68A" stroke="#D97706" stroke-width="2"/></svg>`,
+            cheese: `<svg viewBox="0 0 36 36" fill="none"><path d="M6 25L18 9L30 25H6Z" fill="#FACC15" stroke="#CA8A04" stroke-width="1.8" stroke-linejoin="round"/><circle cx="16" cy="20" r="1.6" fill="#CA8A04"/><circle cx="21" cy="22" r="1.3" fill="#CA8A04"/></svg>`,
+            butter: `<svg viewBox="0 0 36 36" fill="none"><rect x="7" y="14" width="22" height="12" rx="3" fill="#FDE047" stroke="#CA8A04" stroke-width="1.8"/><path d="M11 14L14 10H25L29 14" fill="#FEF08A"/></svg>`,
+            ketchup: `<svg viewBox="0 0 36 36" fill="none"><rect x="14" y="5" width="8" height="4" rx="1" fill="#334155"/><path d="M13 9H23L25 15V29H11V15L13 9Z" fill="#EF4444" stroke="#B91C1C" stroke-width="1.5"/><rect x="13" y="17" width="10" height="7" fill="#FEF2F2"/></svg>`,
+            spice: `<svg viewBox="0 0 36 36" fill="none"><circle cx="13" cy="14" r="2.2" fill="#D97706"/><circle cx="21" cy="12" r="2.5" fill="#65A30D"/><circle cx="18" cy="19" r="2.4" fill="#DC2626"/><circle cx="25" cy="18" r="2" fill="#CA8A04"/><circle cx="12" cy="22" r="2.4" fill="#16A34A"/><circle cx="20" cy="25" r="2.2" fill="#9A3412"/></svg>`,
+            veg: `<svg viewBox="0 0 36 36" fill="none"><circle cx="14" cy="20" r="7" fill="#22C55E"/><circle cx="23" cy="21" r="6" fill="#EF4444"/><path d="M14 13V9M23 15V12" stroke="#15803D" stroke-width="2" stroke-linecap="round"/></svg>`,
+            grain: `<svg viewBox="0 0 36 36" fill="none"><path d="M8 17H28C28 24 23.5 28 18 28C12.5 28 8 24 8 17Z" fill="#F59E0B"/><path d="M12 14C14 11 16 11 18 14C20 11 22 11 24 14" stroke="#D97706" stroke-width="2" stroke-linecap="round"/></svg>`,
+            bread: `<svg viewBox="0 0 36 36" fill="none"><path d="M8 16C8 11.5 12.5 9 18 9C23.5 9 28 11.5 28 16V26H8V16Z" fill="#D97706" stroke="#92400E" stroke-width="1.6"/></svg>`,
+            drink: `<svg viewBox="0 0 36 36" fill="none"><path d="M11 10H25L23 28H13L11 10Z" fill="#BAE6FD" stroke="#0284C7" stroke-width="1.8"/><path d="M19 10L22 5" stroke="#0284C7" stroke-width="2" stroke-linecap="round"/></svg>`
+        };
+
+        const DEFAULT_CATALOG = [
+            { name: 'Молоко', subcat: 'dairy', art: 'milk', amount: 1, unit: 'л' },
+            { name: 'Яйца', subcat: 'dairy', art: 'eggs', amount: 10, unit: 'шт' },
+            { name: 'Сыр', subcat: 'dairy', art: 'cheese', amount: 300, unit: 'г' },
+            { name: 'Сливочное масло', subcat: 'dairy', art: 'butter', amount: 180, unit: 'г' },
+            { name: 'Говядина', subcat: 'meat', art: 'beef', amount: 1, unit: 'кг' },
+            { name: 'Свинина', subcat: 'meat', art: 'pork', amount: 1, unit: 'кг' },
+            { name: 'Курица', subcat: 'meat', art: 'chicken', amount: 1, unit: 'кг' },
+            { name: 'Фарш говяжий', subcat: 'meat', art: 'mince', amount: 500, unit: 'г' },
+            { name: 'Фарш свиной', subcat: 'meat', art: 'mince', amount: 500, unit: 'г' },
+            { name: 'Рыба', subcat: 'meat', art: 'fish', amount: 600, unit: 'г' },
+            { name: 'Кетчуп', subcat: 'pantry', art: 'ketchup', amount: 1, unit: 'шт' },
+            { name: 'Специи и приправы', subcat: 'pantry', art: 'spice', amount: 1, unit: 'уп' },
+            { name: 'Рис', subcat: 'pantry', art: 'grain', amount: 1, unit: 'кг' },
+            { name: 'Гречка', subcat: 'pantry', art: 'grain', amount: 1, unit: 'кг' },
+            { name: 'Макароны', subcat: 'pantry', art: 'grain', amount: 500, unit: 'г' },
+            { name: 'Овощи и зелень', subcat: 'produce', art: 'veg', amount: 1, unit: 'кг' },
+            { name: 'Хлеб', subcat: 'other', art: 'bread', amount: 1, unit: 'шт' },
+            { name: 'Вода / напитки', subcat: 'other', art: 'drink', amount: 1.5, unit: 'л' }
+        ];
 
         let originalItems = [];
         let draftItems = [];
         let deletedIds = [];
-        let currentFilter = 'all';
+        let currentTab = 'in_stock';
+        let currentSubcat = 'all';
+        let searchQuery = '';
         let hasUnsavedChanges = false;
+        let activeToasts = [];
 
-        // Словарь автоподбора иконок
-        const iconMap = {
-            'молок': '🥛', 'яйц': '🥚', 'хлеб': '🍞', 'сыр': '🧀', 'мяс': '🥩',
-            'куриц': '🍗', 'рыб': '🐟', 'карто': '🥔', 'помид': '🍅', 'огур': '🥒',
-            'яблок': '🍎', 'банан': '🍌', 'вод': '💧', 'сок': '🧃', 'масл': '🧈',
-            'колбас': '🌭', 'сосис': '🌭', 'пельмен': '🥟', 'макарон': '🍝', 'рис': '🍚',
-            'греч': '🌾', 'чай': '🫖', 'кофе': '☕', 'сахар': '🧂', 'соль': '🧂',
-            'йогурт': '🍨', 'творог': '🥣', 'сметан': '🥣', 'лук': '🧅', 'чеснок': '🧄',
-            'морков': '🥕', 'капуст': '🥬', 'перец': '🫑', 'лимон': '🍋', 'шоколад': '🍫'
-        };
-
-        function autoIcon() {
-            const name = document.getElementById('itemName').value.toLowerCase();
-            for (let key in iconMap) {
-                if (name.includes(key)) {
-                    document.getElementById('itemIcon').value = iconMap[key];
-                    return;
-                }
-            }
+        function renderArt(artKey) {
+            return SVG_ART[artKey] || SVG_ART.veg;
         }
 
-        // Загрузка данных из Supabase
+        function autoPickArt() {
+            const name = document.getElementById('newName').value.toLowerCase();
+            const artSel = document.getElementById('newArt');
+            const subSel = document.getElementById('newSubcat');
+
+            if (name.includes('говяд')) { artSel.value = 'beef'; subSel.value = 'meat'; return; }
+            if (name.includes('свин')) { artSel.value = 'pork'; subSel.value = 'meat'; return; }
+            if (name.includes('куриц') || name.includes('филе') || name.includes('бедр')) { artSel.value = 'chicken'; subSel.value = 'meat'; return; }
+            if (name.includes('фарш')) { artSel.value = 'mince'; subSel.value = 'meat'; return; }
+            if (name.includes('рыб') || name.includes('лосос') || name.includes('минтай')) { artSel.value = 'fish'; subSel.value = 'meat'; return; }
+            if (name.includes('молок') || name.includes('кефир') || name.includes('йогурт')) { artSel.value = 'milk'; subSel.value = 'dairy'; return; }
+            if (name.includes('яйц')) { artSel.value = 'eggs'; subSel.value = 'dairy'; return; }
+            if (name.includes('сыр')) { artSel.value = 'cheese'; subSel.value = 'dairy'; return; }
+            if (name.includes('масл')) { artSel.value = 'butter'; subSel.value = 'dairy'; return; }
+            if (name.includes('кетчуп') || name.includes('соус') || name.includes('майонез')) { artSel.value = 'ketchup'; subSel.value = 'pantry'; return; }
+            if (name.includes('спец') || name.includes('приправ') || name.includes('перец') || name.includes('соль')) { artSel.value = 'spice'; subSel.value = 'pantry'; return; }
+            if (name.includes('рис') || name.includes('греч') || name.includes('макарон') || name.includes('овсян')) { artSel.value = 'grain'; subSel.value = 'pantry'; return; }
+            if (name.includes('хлеб') || name.includes('булк') || name.includes('лаваш')) { artSel.value = 'bread'; subSel.value = 'other'; return; }
+            if (name.includes('вод') || name.includes('сок') || name.includes('чай') || name.includes('кофе')) { artSel.value = 'drink'; subSel.value = 'other'; return; }
+        }
+
+        function normalizeItem(raw) {
+            return {
+                id: raw.id,
+                name: raw.name || 'Без названия',
+                icon: raw.icon || 'veg',
+                amount: Number(raw.amount) || 0,
+                unit: raw.unit || 'шт',
+                status: raw.status || 'catalog',
+                expiry: raw.expiry || null
+            };
+        }
+
+        function parseSubcat(item) {
+            if (item.expiry && item.expiry.startsWith('cat:')) {
+                return item.expiry.slice(4);
+            }
+            if (['beef', 'pork', 'chicken', 'mince', 'fish'].includes(item.icon)) return 'meat';
+            if (['milk', 'eggs', 'cheese', 'butter'].includes(item.icon)) return 'dairy';
+            if (['veg'].includes(item.icon)) return 'produce';
+            if (['ketchup', 'spice', 'grain'].includes(item.icon)) return 'pantry';
+            return 'other';
+        }
+
+        function isExpiredOrSoon(dateStr) {
+            if (!dateStr || dateStr.startsWith('cat:')) return { text: 'Срок не указан', urgent: false, expired: false };
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const exp = new Date(dateStr + 'T00:00:00');
+            if (isNaN(exp.getTime())) return { text: 'Срок не указан', urgent: false, expired: false };
+            const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+            const formatted = exp.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+            if (diffDays < 0) return { text: `Просрочено (${formatted})`, urgent: true, expired: true };
+            if (diffDays <= 2) return { text: `До ${formatted} (скоро)`, urgent: true, expired: false };
+            return { text: `До ${formatted}`, urgent: false, expired: false };
+        }
+
+        function clearAllToasts() {
+            activeToasts.forEach(t => {
+                if (t.timerId) clearTimeout(t.timerId);
+                if (t.el && t.el.parentNode) t.el.remove();
+            });
+            activeToasts = [];
+        }
+
+        function removeToast(toastObj, animateOut = true) {
+            if (!toastObj) return;
+            if (toastObj.timerId) clearTimeout(toastObj.timerId);
+            activeToasts = activeToasts.filter(t => t !== toastObj);
+            if (!toastObj.el) return;
+            if (!animateOut) {
+                toastObj.el.remove();
+                return;
+            }
+            toastObj.el.classList.add('leaving');
+            setTimeout(() => {
+                if (toastObj.el && toastObj.el.parentNode) toastObj.el.remove();
+            }, 220);
+        }
+
+        function spawnDepletedToast(itemId, itemName, restoreAmount) {
+            const stack = document.getElementById('toastStack');
+
+            while (activeToasts.length >= MAX_TOASTS) {
+                removeToast(activeToasts[0], true);
+            }
+
+            const el = document.createElement('div');
+            el.className = 'toast-item';
+            el.innerHTML = `
+                <div class="toast-label">Добавить в «Купить»<br>«${itemName}»?</div>
+                <button class="toast-yes" type="button">Да</button>
+                <div class="toast-timer-track"><div class="toast-timer-bar"></div></div>
+            `;
+
+            const toastObj = { id: itemId, el, timerId: null };
+            const yesBtn = el.querySelector('.toast-yes');
+            const bar = el.querySelector('.toast-timer-bar');
+
+            yesBtn.onclick = () => {
+                const target = draftItems.find(i => i.id === itemId);
+                if (target) {
+                    target.status = 'to_buy';
+                    target.amount = restoreAmount > 0 ? restoreAmount : 1;
+                    setUnsaved(true);
+                    render();
+                }
+                removeToast(toastObj, false);
+            };
+
+            stack.appendChild(el);
+            activeToasts.push(toastObj);
+
+            requestAnimationFrame(() => {
+                el.classList.add('show');
+                bar.style.transitionDuration = `${TOAST_DURATION_MS}ms`;
+                requestAnimationFrame(() => {
+                    bar.style.transform = 'scaleX(0)';
+                });
+            });
+
+            toastObj.timerId = setTimeout(() => {
+                removeToast(toastObj, true);
+            }, TOAST_DURATION_MS);
+        }
+
         async function fetchItems() {
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?select=*&order=id.asc`, {
@@ -474,220 +933,326 @@
                     }
                 });
                 const data = await res.json();
-                originalItems = JSON.parse(JSON.stringify(data));
-                draftItems = JSON.parse(JSON.stringify(data));
+                if (!Array.isArray(data)) throw new Error('Bad response');
+
+                if (data.length === 0) {
+                    await seedDefaultCatalog();
+                    return;
+                }
+
+                const normalized = data.map(normalizeItem);
+                originalItems = JSON.parse(JSON.stringify(normalized));
+                draftItems = JSON.parse(JSON.stringify(normalized));
                 deletedIds = [];
+                clearAllToasts();
                 setUnsaved(false);
                 render();
-            } catch (e) {
-                document.getElementById('grid').innerHTML = '<div class="loader">Ошибка подключения к базе. Проверь ключи Supabase!</div>';
+            } catch (err) {
+                document.getElementById('grid').innerHTML = '<div class="empty-state">Не удалось загрузить данные. Проверь настройки базы и интернет.</div>';
             }
         }
 
-        function setUnsaved(state) {
-            hasUnsavedChanges = state;
-            const bar = document.getElementById('saveBar');
-            if (state) bar.classList.add('visible');
-            else bar.classList.remove('visible');
+        async function seedDefaultCatalog() {
+            for (const item of DEFAULT_CATALOG) {
+                await fetch(`${SUPABASE_URL}/rest/v1/fridge_items`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: item.name,
+                        icon: item.art,
+                        amount: item.amount,
+                        unit: item.unit,
+                        status: 'catalog',
+                        expiry: `cat:${item.subcat}`
+                    })
+                });
+            }
+            await fetchItems();
         }
 
-        function setFilter(filter, btn) {
-            currentFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        function setUnsaved(val) {
+            hasUnsavedChanges = val;
+            document.getElementById('saveBar').classList.toggle('visible', val);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+            document.getElementById('subcats').classList.toggle('visible', tab === 'catalog');
             render();
         }
 
-        // Проверка срока годности
-        function checkExpiry(dateStr) {
-            if (!dateStr) return { text: 'Без срока', urgent: false };
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const exp = new Date(dateStr);
-            const diffDays = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
-            
-            const formatted = exp.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
-            if (diffDays < 0) return { text: `Испорчено (${formatted})`, urgent: true };
-            if (diffDays <= 2) return { text: `До ${formatted} (!)`, urgent: true };
-            return { text: `До ${formatted}`, urgent: false };
+        function setSubcat(sub) {
+            currentSubcat = sub;
+            document.querySelectorAll('.subcat-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.sub === sub);
+            });
+            render();
         }
 
-        // Отрисовка карточек
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+            document.getElementById('searchClear').classList.toggle('visible', searchQuery.length > 0);
+            render();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+            document.getElementById('searchClear').classList.remove('visible');
+            render();
+        }
+
         function render() {
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
 
-            const filtered = draftItems.filter(item => {
-                if (currentFilter === 'all') return true;
-                return item.status === currentFilter;
+            const items = draftItems.filter(item => {
+                if (currentTab === 'in_stock' && item.status !== 'in_stock') return false;
+                if (currentTab === 'to_buy' && item.status !== 'to_buy') return false;
+                if (currentTab === 'catalog' && currentSubcat !== 'all' && parseSubcat(item) !== currentSubcat) return false;
+                if (searchQuery && !item.name.toLowerCase().includes(searchQuery)) return false;
+                return true;
             });
 
-            if (filtered.length === 0) {
-                grid.innerHTML = '<div class="loader" style="grid-column: 1/-1;">Список пуст</div>';
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="empty-state">Здесь пока пусто</div>';
                 return;
             }
 
-            filtered.forEach(item => {
-                const expInfo = checkExpiry(item.expiry);
+            items.forEach(item => {
                 const card = document.createElement('div');
                 card.className = `card ${item.status}`;
-                
-                const statusLabel = item.status === 'in_stock' ? '🟢 Есть' : '🟠 Купить';
 
-                card.innerHTML = `
-                    <div>
-                        <div class="card-header">
-                            <span class="icon">${item.icon || '📦'}</span>
-                            <button class="status-toggle" onclick="toggleStatus(${item.id})">${statusLabel}</button>
+                if (currentTab === 'in_stock') {
+                    const exp = isExpiredOrSoon(item.expiry);
+                    if (exp.expired) card.classList.add('expired_card');
+                    card.innerHTML = `
+                        <div>
+                            <div class="card-top">
+                                <div class="art-box">${renderArt(item.icon)}</div>
+                                <button class="edit-vol-btn" onclick="openActionModal(${item.id}, 'edit_stock')">Изм.</button>
+                            </div>
+                            <div class="card-title">${item.name}</div>
                         </div>
-                        <div class="title">${item.name}</div>
-                    </div>
-                    <div>
-                        <div class="amount-box">
-                            <button class="amount-btn" onclick="changeAmount(${item.id}, -1)">−</button>
-                            <span class="amount-value" onclick="openModal(${item.id})">${item.amount} ${item.unit}</span>
-                            <button class="amount-btn" onclick="changeAmount(${item.id}, 1)">+</button>
+                        <div>
+                            <div class="amount-row">
+                                <button class="step-btn" onclick="stepAmount(${item.id}, -1)">−</button>
+                                <span class="amount-text" onclick="openActionModal(${item.id}, 'edit_stock')">${item.amount} ${item.unit}</span>
+                                <button class="step-btn" onclick="stepAmount(${item.id}, 1)">+</button>
+                            </div>
+                            <div class="expiry-line ${exp.urgent ? 'urgent' : ''}" onclick="openActionModal(${item.id}, 'edit_stock')" style="cursor:pointer;">
+                                <span>${exp.text}</span>
+                                <span>📅</span>
+                            </div>
                         </div>
-                        <div class="expiry ${expInfo.urgent ? 'urgent' : ''}">
-                            <span>${expInfo.text}</span>
-                            <button class="edit-link" onclick="openModal(${item.id})">Изм.</button>
+                    `;
+                } else if (currentTab === 'to_buy') {
+                    card.innerHTML = `
+                        <div>
+                            <div class="card-top">
+                                <div class="art-box">${renderArt(item.icon)}</div>
+                                <button class="del-x-btn" title="Убрать из списка" onclick="removeFromBuy(${item.id})">×</button>
+                            </div>
+                            <div class="card-title">${item.name}</div>
                         </div>
-                    </div>
-                `;
+                        <div>
+                            <div class="amount-row">
+                                <span class="amount-text" style="text-align:left;padding-left:6px;">${item.amount} ${item.unit}</span>
+                                <button class="edit-vol-btn" onclick="openActionModal(${item.id}, 'edit_buy')">Изм. объём</button>
+                            </div>
+                            <button class="bought-btn" onclick="openActionModal(${item.id}, 'mark_bought')">Куплено → в холодильник</button>
+                        </div>
+                    `;
+                } else {
+                    const stateText = item.status === 'in_stock' ? 'В холодильнике' : (item.status === 'to_buy' ? 'В списке «Купить»' : 'В каталоге');
+                    card.innerHTML = `
+                        <div>
+                            <div class="card-top">
+                                <div class="art-box">${renderArt(item.icon)}</div>
+                                <span class="badge-tag">${stateText}</span>
+                            </div>
+                            <div class="card-title">${item.name}</div>
+                        </div>
+                        <div>
+                            <button class="catalog-pick-btn" onclick="openActionModal(${item.id}, 'pick_to_buy')">+ В «Купить»</button>
+                        </div>
+                    `;
+                }
+
                 grid.appendChild(card);
             });
         }
 
-        // Быстрое изменение количества
-        function changeAmount(id, delta) {
+        function stepAmount(id, dir) {
             const item = draftItems.find(i => i.id === id);
             if (!item) return;
-            // Шаг изменения: если кг или л, то по 0.5, иначе по 1
             const step = (item.unit === 'кг' || item.unit === 'л') ? 0.5 : 1;
-            let newVal = Math.round((item.amount + delta * step) * 10) / 10;
-            if (newVal < 0) newVal = 0;
-            item.amount = newVal;
-            
-            // Если стало 0, автоматически предлагаем перенести в "Купить"
-            if (newVal === 0 && item.status === 'in_stock') {
-                item.status = 'to_buy';
+            const prevAmount = item.amount;
+            const nextVal = Math.max(0, Math.round((item.amount + dir * step) * 100) / 100);
+
+            if (dir < 0 && nextVal === 0 && item.status === 'in_stock') {
+                const subcat = parseSubcat(item);
+                item.amount = 0;
+                item.status = 'catalog';
+                item.expiry = `cat:${subcat}`;
+                spawnDepletedToast(item.id, item.name, prevAmount > 0 ? prevAmount : 1);
+                setUnsaved(true);
+                render();
+                return;
             }
+
+            item.amount = nextVal;
             setUnsaved(true);
             render();
         }
 
-        // Быстрое переключение статуса
-        function toggleStatus(id) {
+        function removeFromBuy(id) {
             const item = draftItems.find(i => i.id === id);
             if (!item) return;
-            item.status = item.status === 'in_stock' ? 'to_buy' : 'in_stock';
+            item.status = 'catalog';
+            item.expiry = `cat:${parseSubcat(item)}`;
             setUnsaved(true);
             render();
         }
 
-        // Модальное окно
-        function openModal(id = null) {
-            const overlay = document.getElementById('modalOverlay');
-            const deleteBtn = document.getElementById('deleteBtn');
-            
-            if (id) {
-                const item = draftItems.find(i => i.id === id);
-                document.getElementById('modalTitle').innerText = 'Редактировать';
-                document.getElementById('editId').value = item.id;
-                document.getElementById('itemName').value = item.name;
-                document.getElementById('itemIcon').value = item.icon;
-                document.getElementById('itemStatus').value = item.status;
-                document.getElementById('itemAmount').value = item.amount;
-                document.getElementById('itemUnit').value = item.unit;
-                document.getElementById('itemExpiry').value = item.expiry || '';
-                deleteBtn.style.display = 'block';
+        function openActionModal(id, mode) {
+            const item = draftItems.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('actionItemId').value = id;
+            document.getElementById('actionMode').value = mode;
+            document.getElementById('actionAmount').value = item.amount > 0 ? item.amount : 1;
+            document.getElementById('actionUnit').value = item.unit || 'шт';
+
+            const expiryField = document.getElementById('expiryField');
+            const expiryInput = document.getElementById('actionExpiry');
+
+            if (mode === 'pick_to_buy') {
+                document.getElementById('actionTitle').innerText = `Купить: ${item.name}`;
+                expiryField.style.display = 'none';
+            } else if (mode === 'edit_buy') {
+                document.getElementById('actionTitle').innerText = `Объём покупки: ${item.name}`;
+                expiryField.style.display = 'none';
+            } else if (mode === 'mark_bought') {
+                document.getElementById('actionTitle').innerText = `В холодильник: ${item.name}`;
+                expiryField.style.display = 'block';
+                expiryInput.value = (item.expiry && !item.expiry.startsWith('cat:')) ? item.expiry : '';
             } else {
-                document.getElementById('modalTitle').innerText = 'Новый продукт';
-                document.getElementById('editId').value = '';
-                document.getElementById('itemName').value = '';
-                document.getElementById('itemIcon').value = '📦';
-                document.getElementById('itemStatus').value = 'in_stock';
-                document.getElementById('itemAmount').value = '1';
-                document.getElementById('itemUnit').value = 'шт';
-                document.getElementById('itemExpiry').value = '';
-                deleteBtn.style.display = 'none';
+                document.getElementById('actionTitle').innerText = `Изменить: ${item.name}`;
+                expiryField.style.display = 'block';
+                expiryInput.value = (item.expiry && !item.expiry.startsWith('cat:')) ? item.expiry : '';
             }
-            overlay.classList.add('open');
+
+            document.getElementById('actionModal').classList.add('open');
         }
 
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('open');
+        function closeActionModal() {
+            document.getElementById('actionModal').classList.remove('open');
         }
 
-        function applyModal() {
-            const idVal = document.getElementById('editId').value;
-            const name = document.getElementById('itemName').value.trim();
+        function confirmActionModal() {
+            const id = Number(document.getElementById('actionItemId').value);
+            const mode = document.getElementById('actionMode').value;
+            const item = draftItems.find(i => i.id === id);
+            if (!item) return;
+
+            const amt = Math.max(0, parseFloat(document.getElementById('actionAmount').value) || 0);
+            const unit = document.getElementById('actionUnit').value;
+            const expVal = document.getElementById('actionExpiry').value;
+
+            item.amount = amt;
+            item.unit = unit;
+
+            if (mode === 'pick_to_buy' || mode === 'edit_buy') {
+                item.status = 'to_buy';
+                const matchedToast = activeToasts.find(t => t.id === id);
+                if (matchedToast) removeToast(matchedToast, false);
+            } else if (mode === 'mark_bought' || mode === 'edit_stock') {
+                item.status = 'in_stock';
+                item.expiry = expVal ? expVal : `cat:${parseSubcat(item)}`;
+            }
+
+            setUnsaved(true);
+            closeActionModal();
+            render();
+        }
+
+        function openCreateModal() {
+            document.getElementById('newName').value = '';
+            document.getElementById('newAmount').value = '1';
+            document.getElementById('newUnit').value = 'шт';
+            document.getElementById('newTarget').value = currentTab === 'to_buy' ? 'to_buy' : (currentTab === 'in_stock' ? 'in_stock' : 'catalog');
+            document.getElementById('createModal').classList.add('open');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.remove('open');
+        }
+
+        function createCustomItem() {
+            const name = document.getElementById('newName').value.trim();
             if (!name) return alert('Введи название продукта');
 
-            const itemData = {
-                name: name,
-                icon: document.getElementById('itemIcon').value || '📦',
-                status: document.getElementById('itemStatus').value,
-                amount: parseFloat(document.getElementById('itemAmount').value) || 0,
-                unit: document.getElementById('itemUnit').value,
-                expiry: document.getElementById('itemExpiry').value || null
-            };
+            const subcat = document.getElementById('newSubcat').value;
+            const art = document.getElementById('newArt').value;
+            const amount = Math.max(0, parseFloat(document.getElementById('newAmount').value) || 0);
+            const unit = document.getElementById('newUnit').value;
+            const status = document.getElementById('newTarget').value;
 
-            if (idVal) {
-                const index = draftItems.findIndex(i => i.id == idVal);
-                draftItems[index] = { ...draftItems[index], ...itemData };
-            } else {
-                // Временный отрицательный ID для новых элементов до сохранения в БД
-                itemData.id = -Date.now();
-                itemData.isNew = true;
-                draftItems.push(itemData);
-            }
+            draftItems.push({
+                id: -Date.now(),
+                isNew: true,
+                name,
+                icon: art,
+                amount,
+                unit,
+                status,
+                expiry: `cat:${subcat}`
+            });
 
             setUnsaved(true);
-            closeModal();
+            closeCreateModal();
             render();
         }
 
-        function deleteItem() {
-            const idVal = parseInt(document.getElementById('editId').value);
-            if (idVal > 0) deletedIds.push(idVal);
-            draftItems = draftItems.filter(i => i.id !== idVal);
-            setUnsaved(true);
-            closeModal();
-            render();
-        }
-
-        // Отмена изменений
         function discardChanges() {
             draftItems = JSON.parse(JSON.stringify(originalItems));
             deletedIds = [];
+            clearAllToasts();
             setUnsaved(false);
             render();
         }
 
-        // Сохранение в облако Supabase
         async function saveChanges() {
             const btn = document.querySelector('.btn-confirm');
-            btn.innerText = 'Сохранение...';
             btn.disabled = true;
+            btn.innerText = 'Сохранение...';
 
             try {
-                // 1. Удаляем удаленные
-                for (let id of deletedIds) {
+                for (const id of deletedIds) {
                     await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${id}`, {
                         method: 'DELETE',
-                        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
                     });
                 }
 
-                // 2. Обновляем существующие и добавляем новые
-                for (let item of draftItems) {
+                for (const item of draftItems) {
                     const payload = {
                         name: item.name,
                         icon: item.icon,
-                        status: item.status,
                         amount: item.amount,
                         unit: item.unit,
+                        status: item.status,
                         expiry: item.expiry
                     };
 
@@ -716,14 +1281,13 @@
 
                 await fetchItems();
             } catch (e) {
-                alert('Ошибка при сохранении!');
+                alert('Ошибка при сохранении. Проверь подключение к сети.');
             } finally {
-                btn.innerText = 'Сохранить';
                 btn.disabled = false;
+                btn.innerText = 'Сохранить';
             }
         }
 
-        // Старт
         fetchItems();
     </script>
 </body>
