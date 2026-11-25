@@ -496,16 +496,23 @@
             transition: transform 0.25s ease;
             z-index: 100;
             width: calc(100% - 24px);
-            max-width: 460px;
+            max-width: 480px;
         }
 
         .save-bar.visible {
             transform: translateX(-50%) translateY(0);
         }
 
+        .save-status {
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
         .save-actions {
             display: flex;
             gap: 8px;
+            flex-shrink: 0;
         }
 
         .btn-confirm {
@@ -688,7 +695,7 @@
     </div>
 
     <div id="saveBar" class="save-bar">
-        <span style="font-size: 14px; font-weight: 700;">Есть несохранённые правки</span>
+        <span id="saveStatusText" class="save-status">Есть несохранённые правки</span>
         <div class="save-actions">
             <button class="btn-cancel" onclick="discardChanges()">Отмена</button>
             <button class="btn-confirm" onclick="saveChanges()">Сохранить</button>
@@ -739,7 +746,7 @@
 
             <div class="form-group">
                 <label>Название</label>
-                <input type="text" id="newName" placeholder="Например: Молоко или Фарш">
+                <input type="text" id="newName" placeholder="Например: Соевый соус или Лимонад">
             </div>
 
             <div class="row-2">
@@ -782,42 +789,96 @@
         const TOAST_DURATION_MS = 7000;
 
         const SVG_ART = {
-            beef: `<svg viewBox="0 0 36 36" fill="none"><rect x="6" y="13" width="22" height="13" rx="5" fill="#B45309"/><circle cx="27" cy="15" r="5" fill="#92400E"/><circle cx="29" cy="14" r="1.2" fill="#FFF"/><path d="M24 10L22 7M30 10L32 7" stroke="#78350F" stroke-width="2" stroke-linecap="round"/><path d="M9 26V30M13 26V30M23 26V30M26 26V30" stroke="#78350F" stroke-width="2.2" stroke-linecap="round"/></svg>`,
-            pork: `<svg viewBox="0 0 36 36" fill="none"><rect x="7" y="13" width="20" height="13" rx="6" fill="#F472B6"/><circle cx="26" cy="16" r="4.5" fill="#EC4899"/><ellipse cx="29.5" cy="16.5" rx="2" ry="1.5" fill="#FBCFE8"/><path d="M24 11L23 8M27 11L28 8" stroke="#DB2777" stroke-width="2" stroke-linecap="round"/><path d="M10 26V30M23 26V30" stroke="#DB2777" stroke-width="2.2" stroke-linecap="round"/></svg>`,
-            chicken: `<svg viewBox="0 0 36 36" fill="none"><ellipse cx="16" cy="19" rx="10" ry="7.5" fill="#F59E0B"/><path d="M24 16L31 12L29 19L24 20Z" fill="#EA580C"/><circle cx="27" cy="15" r="1.2" fill="#FFF"/><path d="M12 26.5V30M18 26.5V30" stroke="#B45309" stroke-width="2.2" stroke-linecap="round"/></svg>`,
-            mince: `<svg viewBox="0 0 36 36" fill="none"><circle cx="13" cy="16" r="4.5" fill="#E11D48"/><circle cx="20" cy="14" r="5" fill="#F43F5E"/><circle cx="24" cy="19" r="4.5" fill="#BE123C"/><circle cx="16" cy="22" r="5" fill="#FB7185"/><circle cx="11" cy="22" r="3.5" fill="#E11D48"/></svg>`,
+            meat: `<svg viewBox="0 0 36 36" fill="none"><rect x="6" y="13" width="22" height="13" rx="5" fill="#E11D48"/><circle cx="25" cy="17" r="4.5" fill="#BE123C"/><path d="M10 26V30M23 26V30" stroke="#9F1239" stroke-width="2.2" stroke-linecap="round"/></svg>`,
             fish: `<svg viewBox="0 0 36 36" fill="none"><path d="M7 18C11 12 19 12 25 18C19 24 11 24 7 18Z" fill="#38BDF8"/><path d="M25 18L31 13V23L25 18Z" fill="#0284C7"/><circle cx="12" cy="17" r="1.4" fill="#0F172A"/></svg>`,
             milk: `<svg viewBox="0 0 36 36" fill="none"><path d="M12 11L15 6H21L24 11V29H12V11Z" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/><rect x="14" y="16" width="8" height="7" rx="1.5" fill="#93C5FD"/></svg>`,
             eggs: `<svg viewBox="0 0 36 36" fill="none"><ellipse cx="13.5" cy="19" rx="6.5" ry="8.5" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/><ellipse cx="22.5" cy="20" rx="6" ry="7.5" fill="#FDE68A" stroke="#D97706" stroke-width="2"/></svg>`,
             cheese: `<svg viewBox="0 0 36 36" fill="none"><path d="M6 25L18 9L30 25H6Z" fill="#FACC15" stroke="#CA8A04" stroke-width="1.8" stroke-linejoin="round"/><circle cx="16" cy="20" r="1.6" fill="#CA8A04"/><circle cx="21" cy="22" r="1.3" fill="#CA8A04"/></svg>`,
-            butter: `<svg viewBox="0 0 36 36" fill="none"><rect x="7" y="14" width="22" height="12" rx="3" fill="#FDE047" stroke="#CA8A04" stroke-width="1.8"/><path d="M11 14L14 10H25L29 14" fill="#FEF08A"/></svg>`,
-            ketchup: `<svg viewBox="0 0 36 36" fill="none"><rect x="14" y="5" width="8" height="4" rx="1" fill="#334155"/><path d="M13 9H23L25 15V29H11V15L13 9Z" fill="#EF4444" stroke="#B91C1C" stroke-width="1.5"/><rect x="13" y="17" width="10" height="7" fill="#FEF2F2"/></svg>`,
-            spice: `<svg viewBox="0 0 36 36" fill="none"><circle cx="13" cy="14" r="2.2" fill="#D97706"/><circle cx="21" cy="12" r="2.5" fill="#65A30D"/><circle cx="18" cy="19" r="2.4" fill="#DC2626"/><circle cx="25" cy="18" r="2" fill="#CA8A04"/><circle cx="12" cy="22" r="2.4" fill="#16A34A"/><circle cx="20" cy="25" r="2.2" fill="#9A3412"/></svg>`,
+            sauce: `<svg viewBox="0 0 36 36" fill="none"><rect x="14" y="5" width="8" height="4" rx="1" fill="#475569"/><path d="M13 9H23L25 15V29H11V15L13 9Z" fill="#EF4444" stroke="#B91C1C" stroke-width="1.5"/><rect x="13" y="17" width="10" height="7" fill="#FEF2F2"/></svg>`,
             veg: `<svg viewBox="0 0 36 36" fill="none"><circle cx="14" cy="20" r="7" fill="#22C55E"/><circle cx="23" cy="21" r="6" fill="#EF4444"/><path d="M14 13V9M23 15V12" stroke="#15803D" stroke-width="2" stroke-linecap="round"/></svg>`,
             grain: `<svg viewBox="0 0 36 36" fill="none"><path d="M8 17H28C28 24 23.5 28 18 28C12.5 28 8 24 8 17Z" fill="#F59E0B"/><path d="M12 14C14 11 16 11 18 14C20 11 22 11 24 14" stroke="#D97706" stroke-width="2" stroke-linecap="round"/></svg>`,
             bread: `<svg viewBox="0 0 36 36" fill="none"><path d="M8 16C8 11.5 12.5 9 18 9C23.5 9 28 11.5 28 16V26H8V16Z" fill="#D97706" stroke="#92400E" stroke-width="1.6"/></svg>`,
-            drink: `<svg viewBox="0 0 36 36" fill="none"><path d="M11 10H25L23 28H13L11 10Z" fill="#BAE6FD" stroke="#0284C7" stroke-width="1.8"/><path d="M19 10L22 5" stroke="#0284C7" stroke-width="2" stroke-linecap="round"/></svg>`
+            drink: `<svg viewBox="0 0 36 36" fill="none"><path d="M11 10H25L23 28H13L11 10Z" fill="#BAE6FD" stroke="#0284C7" stroke-width="1.8"/><path d="M19 10L22 5" stroke="#0284C7" stroke-width="2" stroke-linecap="round"/></svg>`,
+            snack: `<svg viewBox="0 0 36 36" fill="none"><rect x="8" y="8" width="20" height="20" rx="5" fill="#FBBF24" stroke="#D97706" stroke-width="1.8"/><circle cx="15" cy="15" r="2" fill="#FFFBEB"/><circle cx="22" cy="21" r="2" fill="#FFFBEB"/></svg>`
         };
 
         const DEFAULT_CATALOG = [
             { id: -101, name: 'Молоко', art: 'milk', amount: 1, unit: 'л', status: 'catalog' },
-            { id: -102, name: 'Яйца', art: 'eggs', amount: 10, unit: 'шт', status: 'catalog' },
-            { id: -103, name: 'Сыр', art: 'cheese', amount: 300, unit: 'г', status: 'catalog' },
-            { id: -104, name: 'Сливочное масло', art: 'butter', amount: 180, unit: 'г', status: 'catalog' },
-            { id: -105, name: 'Говядина', art: 'beef', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -106, name: 'Свинина', art: 'pork', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -107, name: 'Курица', art: 'chicken', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -108, name: 'Фарш говяжий', art: 'mince', amount: 500, unit: 'г', status: 'catalog' },
-            { id: -109, name: 'Фарш свиной', art: 'mince', amount: 500, unit: 'г', status: 'catalog' },
-            { id: -110, name: 'Рыба', art: 'fish', amount: 600, unit: 'г', status: 'catalog' },
-            { id: -111, name: 'Кетчуп', art: 'ketchup', amount: 1, unit: 'шт', status: 'catalog' },
-            { id: -112, name: 'Специи и приправы', art: 'spice', amount: 1, unit: 'уп', status: 'catalog' },
-            { id: -113, name: 'Рис', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -114, name: 'Гречка', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -115, name: 'Макароны', art: 'grain', amount: 500, unit: 'г', status: 'catalog' },
-            { id: -116, name: 'Овощи и зелень', art: 'veg', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -117, name: 'Хлеб', art: 'bread', amount: 1, unit: 'шт', status: 'catalog' },
-            { id: -118, name: 'Вода / напитки', art: 'drink', amount: 1.5, unit: 'л', status: 'catalog' }
+            { id: -102, name: 'Кефир', art: 'milk', amount: 1, unit: 'л', status: 'catalog' },
+            { id: -103, name: 'Ряженка', art: 'milk', amount: 0.5, unit: 'л', status: 'catalog' },
+            { id: -104, name: 'Сметана', art: 'milk', amount: 300, unit: 'г', status: 'catalog' },
+            { id: -105, name: 'Творог', art: 'milk', amount: 250, unit: 'г', status: 'catalog' },
+            { id: -106, name: 'Греческий йогурт', art: 'milk', amount: 300, unit: 'г', status: 'catalog' },
+            { id: -107, name: 'Яйца', art: 'eggs', amount: 10, unit: 'шт', status: 'catalog' },
+            { id: -108, name: 'Сыр', art: 'cheese', amount: 250, unit: 'г', status: 'catalog' },
+            { id: -109, name: 'Сливочное масло', art: 'cheese', amount: 180, unit: 'г', status: 'catalog' },
+
+            { id: -110, name: 'Говядина', art: 'meat', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -111, name: 'Свинина', art: 'meat', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -112, name: 'Курица', art: 'meat', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -113, name: 'Куриное филе', art: 'meat', amount: 700, unit: 'г', status: 'catalog' },
+            { id: -114, name: 'Куриные бёдра', art: 'meat', amount: 800, unit: 'г', status: 'catalog' },
+            { id: -115, name: 'Индейка', art: 'meat', amount: 700, unit: 'г', status: 'catalog' },
+            { id: -116, name: 'Фарш говяжий', art: 'meat', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -117, name: 'Фарш свиной', art: 'meat', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -118, name: 'Бекон', art: 'meat', amount: 200, unit: 'г', status: 'catalog' },
+            { id: -119, name: 'Сосиски', art: 'meat', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -120, name: 'Колбаса', art: 'meat', amount: 300, unit: 'г', status: 'catalog' },
+            { id: -121, name: 'Лосось', art: 'fish', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -122, name: 'Минтай', art: 'fish', amount: 700, unit: 'г', status: 'catalog' },
+            { id: -123, name: 'Креветки', art: 'fish', amount: 500, unit: 'г', status: 'catalog' },
+
+            { id: -124, name: 'Картофель', art: 'veg', amount: 1.5, unit: 'кг', status: 'catalog' },
+            { id: -125, name: 'Лук репчатый', art: 'veg', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -126, name: 'Морковь', art: 'veg', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -127, name: 'Помидоры', art: 'veg', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -128, name: 'Огурцы', art: 'veg', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -129, name: 'Капуста', art: 'veg', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -130, name: 'Болгарский перец', art: 'veg', amount: 300, unit: 'г', status: 'catalog' },
+            { id: -131, name: 'Кабачок', art: 'veg', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -132, name: 'Чеснок', art: 'veg', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -133, name: 'Зелень (укроп, петрушка)', art: 'veg', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -134, name: 'Лимон', art: 'veg', amount: 2, unit: 'шт', status: 'catalog' },
+            { id: -135, name: 'Яблоки', art: 'veg', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -136, name: 'Бананы', art: 'veg', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -137, name: 'Апельсины', art: 'veg', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -138, name: 'Авокадо', art: 'veg', amount: 2, unit: 'шт', status: 'catalog' },
+
+            { id: -139, name: 'Рис', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -140, name: 'Гречка', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -141, name: 'Макароны', art: 'grain', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -142, name: 'Овсянка', art: 'grain', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -143, name: 'Мука', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -144, name: 'Сахар', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -145, name: 'Соль', art: 'grain', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -146, name: 'Растительное масло', art: 'sauce', amount: 1, unit: 'л', status: 'catalog' },
+            { id: -147, name: 'Оливковое масло', art: 'sauce', amount: 0.5, unit: 'л', status: 'catalog' },
+            { id: -148, name: 'Соевый соус', art: 'sauce', amount: 250, unit: 'мл', status: 'catalog' },
+            { id: -149, name: 'Кетчуп', art: 'sauce', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -150, name: 'Майонез', art: 'sauce', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -151, name: 'Горчица', art: 'sauce', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -152, name: 'Томатная паста', art: 'sauce', amount: 200, unit: 'г', status: 'catalog' },
+            { id: -153, name: 'Уксус', art: 'sauce', amount: 500, unit: 'мл', status: 'catalog' },
+            { id: -154, name: 'Специи и приправы', art: 'sauce', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -155, name: 'Тунец консервированный', art: 'fish', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -156, name: 'Оливки / маслины', art: 'veg', amount: 1, unit: 'шт', status: 'catalog' },
+
+            { id: -157, name: 'Вода', art: 'drink', amount: 1.5, unit: 'л', status: 'catalog' },
+            { id: -158, name: 'Минеральная вода', art: 'drink', amount: 1.5, unit: 'л', status: 'catalog' },
+            { id: -159, name: 'Лимонад', art: 'drink', amount: 1.5, unit: 'л', status: 'catalog' },
+            { id: -160, name: 'Кола', art: 'drink', amount: 1, unit: 'л', status: 'catalog' },
+            { id: -161, name: 'Сок', art: 'drink', amount: 1, unit: 'л', status: 'catalog' },
+            { id: -162, name: 'Чай', art: 'drink', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -163, name: 'Кофе', art: 'drink', amount: 1, unit: 'уп', status: 'catalog' },
+
+            { id: -164, name: 'Хлеб', art: 'bread', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -165, name: 'Батон', art: 'bread', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -166, name: 'Лаваш', art: 'bread', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -167, name: 'Чипсы', art: 'snack', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -168, name: 'Сухарики', art: 'snack', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -169, name: 'Орехи', art: 'snack', amount: 200, unit: 'г', status: 'catalog' },
+            { id: -170, name: 'Шоколад', art: 'snack', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -171, name: 'Печенье', art: 'snack', amount: 1, unit: 'уп', status: 'catalog' }
         ];
 
         let originalItems = [];
@@ -867,25 +928,29 @@
 
         function detectArtByName(rawName) {
             const name = (rawName || '').toLowerCase();
-            if (name.includes('говяд')) return 'beef';
-            if (name.includes('свин')) return 'pork';
-            if (name.includes('куриц') || name.includes('филе') || name.includes('бедр')) return 'chicken';
-            if (name.includes('фарш')) return 'mince';
-            if (name.includes('рыб') || name.includes('лосос') || name.includes('минтай')) return 'fish';
-            if (name.includes('молок') || name.includes('кефир') || name.includes('йогурт')) return 'milk';
+            if (name.includes('рыб') || name.includes('лосос') || name.includes('минтай') || name.includes('кревет') || name.includes('тунец')) return 'fish';
+            if (name.includes('мяс') || name.includes('говяд') || name.includes('свин') || name.includes('куриц') || name.includes('филе') || name.includes('бёдр') || name.includes('индейк') || name.includes('фарш') || name.includes('бекон') || name.includes('сосис') || name.includes('колбас')) return 'meat';
             if (name.includes('яйц')) return 'eggs';
-            if (name.includes('сыр')) return 'cheese';
-            if (name.includes('масл')) return 'butter';
-            if (name.includes('кетчуп') || name.includes('соус') || name.includes('майонез')) return 'ketchup';
-            if (name.includes('спец') || name.includes('приправ') || name.includes('перец') || name.includes('соль')) return 'spice';
-            if (name.includes('рис') || name.includes('греч') || name.includes('макарон') || name.includes('овсян')) return 'grain';
-            if (name.includes('хлеб') || name.includes('булк') || name.includes('лаваш')) return 'bread';
-            if (name.includes('вод') || name.includes('сок') || name.includes('чай') || name.includes('кофе')) return 'drink';
+            if (name.includes('сыр') || name.includes('масл')) return 'cheese';
+            if (name.includes('молок') || name.includes('кефир') || name.includes('ряженк') || name.includes('сметан') || name.includes('творог') || name.includes('йогурт')) return 'milk';
+            if (name.includes('соус') || name.includes('кетчуп') || name.includes('майонез') || name.includes('горчиц') || name.includes('паст') || name.includes('уксус') || name.includes('спец') || name.includes('приправ')) return 'sauce';
+            if (name.includes('вод') || name.includes('лимонад') || name.includes('кол') || name.includes('сок') || name.includes('чай') || name.includes('кофе') || name.includes('напит')) return 'drink';
+            if (name.includes('хлеб') || name.includes('батон') || name.includes('лаваш') || name.includes('булк')) return 'bread';
+            if (name.includes('чипс') || name.includes('сухар') || name.includes('орех') || name.includes('шоколад') || name.includes('печен')) return 'snack';
+            if (name.includes('рис') || name.includes('греч') || name.includes('макарон') || name.includes('овсян') || name.includes('мук') || name.includes('сахар') || name.includes('сол')) return 'grain';
             return 'veg';
         }
 
         function renderArt(artKey) {
             return SVG_ART[artKey] || SVG_ART.veg;
+        }
+
+        function mergeCatalogWithItems(items) {
+            const existingNames = new Set(items.map(i => i.name.toLowerCase()));
+            const extraDefaults = DEFAULT_CATALOG
+                .filter(d => !existingNames.has(d.name.toLowerCase()))
+                .map(normalizeItem);
+            return [...items, ...extraDefaults];
         }
 
         function normalizeItem(raw) {
@@ -980,7 +1045,7 @@
                 if (target) {
                     target.status = 'to_buy';
                     target.amount = restoreAmount > 0 ? restoreAmount : 1;
-                    setUnsaved(true);
+                    setUnsaved(true, 'Есть несохранённые правки');
                     render();
                 }
                 removeToast(toastObj, false);
@@ -1002,22 +1067,23 @@
             }, TOAST_DURATION_MS);
         }
 
-        function loadFallbackCatalog(keepUnsaved = false) {
+        function loadFallbackCatalog(keepUnsaved = false, statusMsg = 'Есть несохранённые правки') {
             const cached = readLocalCache();
-            const base = cached || DEFAULT_CATALOG.map(normalizeItem);
+            const base = mergeCatalogWithItems(cached || DEFAULT_CATALOG.map(normalizeItem));
             originalItems = JSON.parse(JSON.stringify(base));
             draftItems = JSON.parse(JSON.stringify(base));
             deletedIds = [];
             clearAllToasts();
-            setUnsaved(keepUnsaved);
+            setUnsaved(keepUnsaved, statusMsg);
             render();
         }
 
         async function fetchItems() {
             const cached = readLocalCache();
             if (cached && draftItems.length === 0) {
-                originalItems = JSON.parse(JSON.stringify(cached));
-                draftItems = JSON.parse(JSON.stringify(cached));
+                const mergedCached = mergeCatalogWithItems(cached);
+                originalItems = JSON.parse(JSON.stringify(mergedCached));
+                draftItems = JSON.parse(JSON.stringify(mergedCached));
                 render();
             }
 
@@ -1033,11 +1099,11 @@
                 if (!Array.isArray(data)) throw new Error('Bad response');
 
                 if (data.length === 0) {
-                    loadFallbackCatalog(true);
+                    loadFallbackCatalog(true, 'Локальный каталог готов — нажми «Сохранить»');
                     return;
                 }
 
-                const normalized = data.map(normalizeItem);
+                const normalized = mergeCatalogWithItems(data.map(normalizeItem));
                 originalItems = JSON.parse(JSON.stringify(normalized));
                 draftItems = JSON.parse(JSON.stringify(normalized));
                 deletedIds = [];
@@ -1050,8 +1116,10 @@
             }
         }
 
-        function setUnsaved(val) {
+        function setUnsaved(val, statusMsg = 'Есть несохранённые правки') {
             hasUnsavedChanges = val;
+            const statusEl = document.getElementById('saveStatusText');
+            if (statusEl) statusEl.innerText = statusMsg;
             document.getElementById('saveBar').classList.toggle('visible', val);
             if (val) {
                 writeLocalCache(draftItems);
@@ -1195,13 +1263,13 @@
                 item.status = 'catalog';
                 item.expiry = null;
                 spawnDepletedToast(item.id, item.name, prevAmount > 0 ? prevAmount : 1);
-                setUnsaved(true);
+                setUnsaved(true, 'Есть несохранённые правки');
                 render();
                 return;
             }
 
             item.amount = nextVal;
-            setUnsaved(true);
+            setUnsaved(true, 'Есть несохранённые правки');
             render();
         }
 
@@ -1209,7 +1277,7 @@
             const item = draftItems.find(i => i.id === id);
             if (!item) return;
             item.status = 'catalog';
-            setUnsaved(true);
+            setUnsaved(true, 'Есть несохранённые правки');
             render();
         }
 
@@ -1271,7 +1339,7 @@
                 item.expiry = expVal || null;
             }
 
-            setUnsaved(true);
+            setUnsaved(true, 'Есть несохранённые правки');
             closeActionModal();
             render();
         }
@@ -1290,7 +1358,7 @@
 
         function createCustomItem(targetStatus) {
             const rawName = document.getElementById('newName').value.trim();
-            if (!rawName) return alert('Введи название продукта');
+            if (!rawName) return;
 
             const name = capitalizeFirst(rawName);
             const art = detectArtByName(name);
@@ -1308,7 +1376,7 @@
                 expiry: null
             });
 
-            setUnsaved(true);
+            setUnsaved(true, 'Есть несохранённые правки');
             closeCreateModal();
             render();
         }
@@ -1326,12 +1394,15 @@
             const btn = document.querySelector('.btn-confirm');
             btn.disabled = true;
             btn.innerText = 'Сохранение...';
+            writeLocalCache(draftItems);
 
             const headers = {
                 'apikey': SUPABASE_KEY,
                 'Authorization': `Bearer ${SUPABASE_KEY}`,
                 'Content-Type': 'application/json'
             };
+
+            let syncedOk = true;
 
             try {
                 for (const id of deletedIds) {
@@ -1340,7 +1411,7 @@
                             method: 'DELETE',
                             headers
                         });
-                        if (!delRes.ok) throw new Error(`DELETE ${delRes.status}`);
+                        if (!delRes.ok) syncedOk = false;
                     }
                 }
 
@@ -1363,9 +1434,14 @@
                             },
                             body: JSON.stringify(payload)
                         });
-                        if (!postRes.ok) {
-                            const errText = await postRes.text();
-                            throw new Error(`POST ${postRes.status}: ${errText}`);
+                        if (postRes.ok) {
+                            const created = await postRes.json();
+                            if (Array.isArray(created) && created[0] && created[0].id) {
+                                item.id = created[0].id;
+                                item.isNew = false;
+                            }
+                        } else {
+                            syncedOk = false;
                         }
                     } else {
                         const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${item.id}`, {
@@ -1373,17 +1449,21 @@
                             headers,
                             body: JSON.stringify(payload)
                         });
-                        if (!patchRes.ok) {
-                            const errText = await patchRes.text();
-                            throw new Error(`PATCH ${patchRes.status}: ${errText}`);
-                        }
+                        if (!patchRes.ok) syncedOk = false;
                     }
                 }
 
-                await fetchItems();
+                if (syncedOk) {
+                    deletedIds = [];
+                    originalItems = JSON.parse(JSON.stringify(draftItems));
+                    writeLocalCache(draftItems);
+                    clearAllToasts();
+                    setUnsaved(false);
+                } else {
+                    setUnsaved(true, 'Сохранено локально (ошибка сети)');
+                }
             } catch (e) {
-                writeLocalCache(draftItems);
-                alert(`Не удалось отправить в базу (${e.message}). Черновик сохранён локально на устройстве — попробуй нажать «Сохранить» ещё раз или сменить режим VPN.`);
+                setUnsaved(true, 'Сохранено локально (нет связи)');
             } finally {
                 btn.disabled = false;
                 btn.innerText = 'Сохранить';
