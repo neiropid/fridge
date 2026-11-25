@@ -12,58 +12,58 @@
             --surface: #FFFFFF;
             --surface-soft: #F3F4F6;
             --card-stock: #E8F5E9;
-            --card-stock-border: #9CCC9E;
+            --card-stock-border: #81C784;
             --card-buy: #FFF3E0;
             --card-buy-border: #FFB74D;
             --card-catalog: #FFFFFF;
-            --card-catalog-border: #E5E7EB;
-            --card-inner-bg: rgba(255, 255, 255, 0.85);
-            --card-inner-border: rgba(0, 0, 0, 0.06);
-            --text-main: #18181B;
-            --text-muted: #6B7280;
+            --card-catalog-border: #D1D5DB;
+            --card-inner-bg: rgba(255, 255, 255, 0.88);
+            --card-inner-border: rgba(0, 0, 0, 0.08);
+            --text-main: #111827;
+            --text-muted: #4B5563;
             --border-subtle: #E5E7EB;
-            --border-input: #D1D5DB;
+            --border-input: #CBD5E1;
             --danger: #DC2626;
             --primary: #2563EB;
-            --catalog-pick-bg: #EFF6FF;
+            --catalog-pick-bg: #DBEAFE;
             --success: #059669;
             --toast-bg: #FFFFFF;
-            --toast-border: #F59E0B;
-            --toast-track: #FEF3C7;
-            --toast-bar: #F59E0B;
-            --save-bar-bg: #18181B;
+            --toast-border: #EF4444;
+            --toast-track: #E5E7EB;
+            --toast-bar: #EF4444;
+            --save-bar-bg: #111827;
             --save-bar-text: #FFFFFF;
             --modal-bg: #FFFFFF;
             --radius: 18px;
         }
 
         body.dark-theme {
-            --bg: #0F1115;
-            --surface: #181B21;
-            --surface-soft: #232730;
-            --card-stock: #15291C;
-            --card-stock-border: #2B593B;
-            --card-buy: #2B2012;
-            --card-buy-border: #7C531E;
-            --card-catalog: #181B21;
-            --card-catalog-border: #2C313C;
-            --card-inner-bg: rgba(15, 17, 21, 0.68);
-            --card-inner-border: rgba(255, 255, 255, 0.08);
-            --text-main: #F3F4F6;
+            --bg: #0D0F13;
+            --surface: #171A21;
+            --surface-soft: #222732;
+            --card-stock: #132A1C;
+            --card-stock-border: #2E6B46;
+            --card-buy: #2E1F0F;
+            --card-buy-border: #9A5B13;
+            --card-catalog: #171A21;
+            --card-catalog-border: #2E3442;
+            --card-inner-bg: rgba(13, 15, 19, 0.72);
+            --card-inner-border: rgba(255, 255, 255, 0.1);
+            --text-main: #F9FAFB;
             --text-muted: #9CA3AF;
-            --border-subtle: #2C313C;
-            --border-input: #374151;
+            --border-subtle: #2E3442;
+            --border-input: #3B4254;
             --danger: #F87171;
             --primary: #3B82F6;
-            --catalog-pick-bg: #1E293B;
+            --catalog-pick-bg: #1E3A5F;
             --success: #10B981;
-            --toast-bg: #1C2028;
-            --toast-border: #D97706;
-            --toast-track: #3B2810;
-            --toast-bar: #F59E0B;
-            --save-bar-bg: #232730;
+            --toast-bg: #181C24;
+            --toast-border: #EF4444;
+            --toast-track: #3F3F46;
+            --toast-bar: #EF4444;
+            --save-bar-bg: #222732;
             --save-bar-text: #F9FAFB;
-            --modal-bg: #181B21;
+            --modal-bg: #171A21;
         }
 
         * {
@@ -81,7 +81,7 @@
             padding-bottom: 120px;
             max-width: 1240px;
             margin: 0 auto;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: background-color 0.18s ease, color 0.18s ease;
         }
 
         header {
@@ -159,7 +159,7 @@
 
         .search-wrap {
             position: relative;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
 
         .search-input {
@@ -203,6 +203,43 @@
             display: block;
         }
 
+        .subcats {
+            display: none;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 14px;
+            scrollbar-width: none;
+        }
+
+        .subcats::-webkit-scrollbar {
+            display: none;
+        }
+
+        .subcats.visible {
+            display: flex;
+        }
+
+        .subcat-btn {
+            flex: 0 0 auto;
+            min-height: 38px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--border-input);
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .subcat-btn.active {
+            background: var(--primary);
+            color: #FFFFFF;
+            border-color: var(--primary);
+        }
+
         .toast-stack {
             position: fixed;
             top: 12px;
@@ -229,8 +266,8 @@
             background: var(--toast-bg);
             border: 1.5px solid var(--toast-border);
             border-radius: 14px;
-            padding: 10px 12px 14px 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+            padding: 10px 12px 15px 12px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -262,7 +299,7 @@
             padding: 6px 12px;
             border-radius: 10px;
             border: none;
-            background: #D97706;
+            background: #EF4444;
             color: #FFFFFF;
             font-size: 12px;
             font-weight: 800;
@@ -275,7 +312,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            height: 4px;
+            height: 5px;
             background: var(--toast-track);
         }
 
@@ -308,7 +345,7 @@
             flex-direction: column;
             justify-content: space-between;
             border: 1.5px solid var(--card-catalog-border);
-            background: var(--card-catalog);
+            background-color: var(--card-catalog);
             color: var(--text-main);
             position: relative;
             min-height: 185px;
@@ -326,7 +363,7 @@
 
         .card.expired_card {
             border-color: var(--danger);
-            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.3);
+            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.35);
         }
 
         .card-top {
@@ -496,7 +533,7 @@
             transition: transform 0.25s ease;
             z-index: 100;
             width: calc(100% - 24px);
-            max-width: 480px;
+            max-width: 520px;
         }
 
         .save-bar.visible {
@@ -504,7 +541,7 @@
         }
 
         .save-status {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             line-height: 1.25;
         }
@@ -690,6 +727,16 @@
         <button id="searchClear" class="search-clear" onclick="clearSearch()">×</button>
     </div>
 
+    <div id="subcats" class="subcats">
+        <button class="subcat-btn active" data-sub="all" onclick="setSubcat('all')">Все</button>
+        <button class="subcat-btn" data-sub="meat" onclick="setSubcat('meat')">Мясо и рыба</button>
+        <button class="subcat-btn" data-sub="dairy" onclick="setSubcat('dairy')">Молочка и яйца</button>
+        <button class="subcat-btn" data-sub="produce" onclick="setSubcat('produce')">Овощи и фрукты</button>
+        <button class="subcat-btn" data-sub="pantry" onclick="setSubcat('pantry')">Бакалея и соусы</button>
+        <button class="subcat-btn" data-sub="drinks" onclick="setSubcat('drinks')">Напитки</button>
+        <button class="subcat-btn" data-sub="other" onclick="setSubcat('other')">Снэки и разное</button>
+    </div>
+
     <div id="grid" class="grid">
         <div class="empty-state">Загрузка данных...</div>
     </div>
@@ -789,12 +836,17 @@
         const TOAST_DURATION_MS = 7000;
 
         const SVG_ART = {
-            meat: `<svg viewBox="0 0 36 36" fill="none"><rect x="6" y="13" width="22" height="13" rx="5" fill="#E11D48"/><circle cx="25" cy="17" r="4.5" fill="#BE123C"/><path d="M10 26V30M23 26V30" stroke="#9F1239" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+            beef: `<svg viewBox="0 0 36 36" fill="none"><rect x="6" y="13" width="22" height="13" rx="5" fill="#B45309"/><circle cx="27" cy="15" r="5" fill="#92400E"/><circle cx="29" cy="14" r="1.2" fill="#FFF"/><path d="M24 10L22 7M30 10L32 7" stroke="#78350F" stroke-width="2" stroke-linecap="round"/><path d="M9 26V30M13 26V30M23 26V30M26 26V30" stroke="#78350F" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+            pork: `<svg viewBox="0 0 36 36" fill="none"><rect x="7" y="13" width="20" height="13" rx="6" fill="#F472B6"/><circle cx="26" cy="16" r="4.5" fill="#EC4899"/><ellipse cx="29.5" cy="16.5" rx="2" ry="1.5" fill="#FBCFE8"/><path d="M24 11L23 8M27 11L28 8" stroke="#DB2777" stroke-width="2" stroke-linecap="round"/><path d="M10 26V30M23 26V30" stroke="#DB2777" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+            chicken: `<svg viewBox="0 0 36 36" fill="none"><ellipse cx="16" cy="19" rx="10" ry="7.5" fill="#F59E0B"/><path d="M24 16L31 12L29 19L24 20Z" fill="#EA580C"/><circle cx="27" cy="15" r="1.2" fill="#FFF"/><path d="M12 26.5V30M18 26.5V30" stroke="#B45309" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+            mince: `<svg viewBox="0 0 36 36" fill="none"><circle cx="13" cy="16" r="4.5" fill="#E11D48"/><circle cx="20" cy="14" r="5" fill="#F43F5E"/><circle cx="24" cy="19" r="4.5" fill="#BE123C"/><circle cx="16" cy="22" r="5" fill="#FB7185"/><circle cx="11" cy="22" r="3.5" fill="#E11D48"/></svg>`,
             fish: `<svg viewBox="0 0 36 36" fill="none"><path d="M7 18C11 12 19 12 25 18C19 24 11 24 7 18Z" fill="#38BDF8"/><path d="M25 18L31 13V23L25 18Z" fill="#0284C7"/><circle cx="12" cy="17" r="1.4" fill="#0F172A"/></svg>`,
             milk: `<svg viewBox="0 0 36 36" fill="none"><path d="M12 11L15 6H21L24 11V29H12V11Z" fill="#EFF6FF" stroke="#3B82F6" stroke-width="2"/><rect x="14" y="16" width="8" height="7" rx="1.5" fill="#93C5FD"/></svg>`,
             eggs: `<svg viewBox="0 0 36 36" fill="none"><ellipse cx="13.5" cy="19" rx="6.5" ry="8.5" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/><ellipse cx="22.5" cy="20" rx="6" ry="7.5" fill="#FDE68A" stroke="#D97706" stroke-width="2"/></svg>`,
             cheese: `<svg viewBox="0 0 36 36" fill="none"><path d="M6 25L18 9L30 25H6Z" fill="#FACC15" stroke="#CA8A04" stroke-width="1.8" stroke-linejoin="round"/><circle cx="16" cy="20" r="1.6" fill="#CA8A04"/><circle cx="21" cy="22" r="1.3" fill="#CA8A04"/></svg>`,
-            sauce: `<svg viewBox="0 0 36 36" fill="none"><rect x="14" y="5" width="8" height="4" rx="1" fill="#475569"/><path d="M13 9H23L25 15V29H11V15L13 9Z" fill="#EF4444" stroke="#B91C1C" stroke-width="1.5"/><rect x="13" y="17" width="10" height="7" fill="#FEF2F2"/></svg>`,
+            butter: `<svg viewBox="0 0 36 36" fill="none"><rect x="7" y="14" width="22" height="12" rx="3" fill="#FDE047" stroke="#CA8A04" stroke-width="1.8"/><path d="M11 14L14 10H25L29 14" fill="#FEF08A"/></svg>`,
+            ketchup: `<svg viewBox="0 0 36 36" fill="none"><rect x="14" y="5" width="8" height="4" rx="1" fill="#334155"/><path d="M13 9H23L25 15V29H11V15L13 9Z" fill="#EF4444" stroke="#B91C1C" stroke-width="1.5"/><rect x="13" y="17" width="10" height="7" fill="#FEF2F2"/></svg>`,
+            spice: `<svg viewBox="0 0 36 36" fill="none"><circle cx="13" cy="14" r="2.2" fill="#D97706"/><circle cx="21" cy="12" r="2.5" fill="#65A30D"/><circle cx="18" cy="19" r="2.4" fill="#DC2626"/><circle cx="25" cy="18" r="2" fill="#CA8A04"/><circle cx="12" cy="22" r="2.4" fill="#16A34A"/><circle cx="20" cy="25" r="2.2" fill="#9A3412"/></svg>`,
             veg: `<svg viewBox="0 0 36 36" fill="none"><circle cx="14" cy="20" r="7" fill="#22C55E"/><circle cx="23" cy="21" r="6" fill="#EF4444"/><path d="M14 13V9M23 15V12" stroke="#15803D" stroke-width="2" stroke-linecap="round"/></svg>`,
             grain: `<svg viewBox="0 0 36 36" fill="none"><path d="M8 17H28C28 24 23.5 28 18 28C12.5 28 8 24 8 17Z" fill="#F59E0B"/><path d="M12 14C14 11 16 11 18 14C20 11 22 11 24 14" stroke="#D97706" stroke-width="2" stroke-linecap="round"/></svg>`,
             bread: `<svg viewBox="0 0 36 36" fill="none"><path d="M8 16C8 11.5 12.5 9 18 9C23.5 9 28 11.5 28 16V26H8V16Z" fill="#D97706" stroke="#92400E" stroke-width="1.6"/></svg>`,
@@ -811,19 +863,19 @@
             { id: -106, name: 'Греческий йогурт', art: 'milk', amount: 300, unit: 'г', status: 'catalog' },
             { id: -107, name: 'Яйца', art: 'eggs', amount: 10, unit: 'шт', status: 'catalog' },
             { id: -108, name: 'Сыр', art: 'cheese', amount: 250, unit: 'г', status: 'catalog' },
-            { id: -109, name: 'Сливочное масло', art: 'cheese', amount: 180, unit: 'г', status: 'catalog' },
+            { id: -109, name: 'Сливочное масло', art: 'butter', amount: 180, unit: 'г', status: 'catalog' },
 
-            { id: -110, name: 'Говядина', art: 'meat', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -111, name: 'Свинина', art: 'meat', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -112, name: 'Курица', art: 'meat', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -113, name: 'Куриное филе', art: 'meat', amount: 700, unit: 'г', status: 'catalog' },
-            { id: -114, name: 'Куриные бёдра', art: 'meat', amount: 800, unit: 'г', status: 'catalog' },
-            { id: -115, name: 'Индейка', art: 'meat', amount: 700, unit: 'г', status: 'catalog' },
-            { id: -116, name: 'Фарш говяжий', art: 'meat', amount: 500, unit: 'г', status: 'catalog' },
-            { id: -117, name: 'Фарш свиной', art: 'meat', amount: 500, unit: 'г', status: 'catalog' },
-            { id: -118, name: 'Бекон', art: 'meat', amount: 200, unit: 'г', status: 'catalog' },
-            { id: -119, name: 'Сосиски', art: 'meat', amount: 1, unit: 'уп', status: 'catalog' },
-            { id: -120, name: 'Колбаса', art: 'meat', amount: 300, unit: 'г', status: 'catalog' },
+            { id: -110, name: 'Говядина', art: 'beef', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -111, name: 'Свинина', art: 'pork', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -112, name: 'Курица', art: 'chicken', amount: 1, unit: 'кг', status: 'catalog' },
+            { id: -113, name: 'Куриное филе', art: 'chicken', amount: 700, unit: 'г', status: 'catalog' },
+            { id: -114, name: 'Куриные бёдра', art: 'chicken', amount: 800, unit: 'г', status: 'catalog' },
+            { id: -115, name: 'Индейка', art: 'chicken', amount: 700, unit: 'г', status: 'catalog' },
+            { id: -116, name: 'Фарш говяжий', art: 'mince', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -117, name: 'Фарш свиной', art: 'mince', amount: 500, unit: 'г', status: 'catalog' },
+            { id: -118, name: 'Бекон', art: 'pork', amount: 200, unit: 'г', status: 'catalog' },
+            { id: -119, name: 'Сосиски', art: 'pork', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -120, name: 'Колбаса', art: 'beef', amount: 300, unit: 'г', status: 'catalog' },
             { id: -121, name: 'Лосось', art: 'fish', amount: 500, unit: 'г', status: 'catalog' },
             { id: -122, name: 'Минтай', art: 'fish', amount: 700, unit: 'г', status: 'catalog' },
             { id: -123, name: 'Креветки', art: 'fish', amount: 500, unit: 'г', status: 'catalog' },
@@ -850,16 +902,16 @@
             { id: -142, name: 'Овсянка', art: 'grain', amount: 500, unit: 'г', status: 'catalog' },
             { id: -143, name: 'Мука', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
             { id: -144, name: 'Сахар', art: 'grain', amount: 1, unit: 'кг', status: 'catalog' },
-            { id: -145, name: 'Соль', art: 'grain', amount: 1, unit: 'уп', status: 'catalog' },
-            { id: -146, name: 'Растительное масло', art: 'sauce', amount: 1, unit: 'л', status: 'catalog' },
-            { id: -147, name: 'Оливковое масло', art: 'sauce', amount: 0.5, unit: 'л', status: 'catalog' },
-            { id: -148, name: 'Соевый соус', art: 'sauce', amount: 250, unit: 'мл', status: 'catalog' },
-            { id: -149, name: 'Кетчуп', art: 'sauce', amount: 1, unit: 'шт', status: 'catalog' },
-            { id: -150, name: 'Майонез', art: 'sauce', amount: 1, unit: 'уп', status: 'catalog' },
-            { id: -151, name: 'Горчица', art: 'sauce', amount: 1, unit: 'шт', status: 'catalog' },
-            { id: -152, name: 'Томатная паста', art: 'sauce', amount: 200, unit: 'г', status: 'catalog' },
-            { id: -153, name: 'Уксус', art: 'sauce', amount: 500, unit: 'мл', status: 'catalog' },
-            { id: -154, name: 'Специи и приправы', art: 'sauce', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -145, name: 'Соль', art: 'spice', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -146, name: 'Растительное масло', art: 'butter', amount: 1, unit: 'л', status: 'catalog' },
+            { id: -147, name: 'Оливковое масло', art: 'butter', amount: 0.5, unit: 'л', status: 'catalog' },
+            { id: -148, name: 'Соевый соус', art: 'ketchup', amount: 250, unit: 'мл', status: 'catalog' },
+            { id: -149, name: 'Кетчуп', art: 'ketchup', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -150, name: 'Майонез', art: 'ketchup', amount: 1, unit: 'уп', status: 'catalog' },
+            { id: -151, name: 'Горчица', art: 'ketchup', amount: 1, unit: 'шт', status: 'catalog' },
+            { id: -152, name: 'Томатная паста', art: 'ketchup', amount: 200, unit: 'г', status: 'catalog' },
+            { id: -153, name: 'Уксус', art: 'ketchup', amount: 500, unit: 'мл', status: 'catalog' },
+            { id: -154, name: 'Специи и приправы', art: 'spice', amount: 1, unit: 'уп', status: 'catalog' },
             { id: -155, name: 'Тунец консервированный', art: 'fish', amount: 1, unit: 'шт', status: 'catalog' },
             { id: -156, name: 'Оливки / маслины', art: 'veg', amount: 1, unit: 'шт', status: 'catalog' },
 
@@ -885,6 +937,7 @@
         let draftItems = [];
         let deletedIds = [];
         let currentTab = 'in_stock';
+        let currentSubcat = 'all';
         let searchQuery = '';
         let hasUnsavedChanges = false;
         let activeToasts = [];
@@ -898,6 +951,7 @@
 
         function applyTheme(theme) {
             const isDark = theme === 'dark';
+            document.documentElement.classList.toggle('dark-theme', isDark);
             document.body.classList.toggle('dark-theme', isDark);
             const btn = document.getElementById('themeBtn');
             if (btn) {
@@ -906,11 +960,12 @@
             try {
                 localStorage.setItem(THEME_STORAGE_KEY, isDark ? 'dark' : 'light');
             } catch (_) {}
+            render();
         }
 
         function toggleTheme() {
-            const nextTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
-            applyTheme(nextTheme);
+            const isDarkNow = document.body.classList.contains('dark-theme') || document.documentElement.classList.contains('dark-theme');
+            applyTheme(isDarkNow ? 'light' : 'dark');
         }
 
         function initTheme() {
@@ -928,17 +983,31 @@
 
         function detectArtByName(rawName) {
             const name = (rawName || '').toLowerCase();
+            if (name.includes('фарш')) return 'mince';
+            if (name.includes('говяд')) return 'beef';
+            if (name.includes('свин') || name.includes('бекон') || name.includes('сосис')) return 'pork';
+            if (name.includes('куриц') || name.includes('филе') || name.includes('бёдр') || name.includes('индейк')) return 'chicken';
             if (name.includes('рыб') || name.includes('лосос') || name.includes('минтай') || name.includes('кревет') || name.includes('тунец')) return 'fish';
-            if (name.includes('мяс') || name.includes('говяд') || name.includes('свин') || name.includes('куриц') || name.includes('филе') || name.includes('бёдр') || name.includes('индейк') || name.includes('фарш') || name.includes('бекон') || name.includes('сосис') || name.includes('колбас')) return 'meat';
             if (name.includes('яйц')) return 'eggs';
-            if (name.includes('сыр') || name.includes('масл')) return 'cheese';
+            if (name.includes('сыр')) return 'cheese';
+            if (name.includes('масл')) return 'butter';
             if (name.includes('молок') || name.includes('кефир') || name.includes('ряженк') || name.includes('сметан') || name.includes('творог') || name.includes('йогурт')) return 'milk';
-            if (name.includes('соус') || name.includes('кетчуп') || name.includes('майонез') || name.includes('горчиц') || name.includes('паст') || name.includes('уксус') || name.includes('спец') || name.includes('приправ')) return 'sauce';
+            if (name.includes('соус') || name.includes('кетчуп') || name.includes('майонез') || name.includes('горчиц') || name.includes('паст') || name.includes('уксус')) return 'ketchup';
+            if (name.includes('спец') || name.includes('приправ') || name.includes('перец') || name.includes('сол')) return 'spice';
             if (name.includes('вод') || name.includes('лимонад') || name.includes('кол') || name.includes('сок') || name.includes('чай') || name.includes('кофе') || name.includes('напит')) return 'drink';
             if (name.includes('хлеб') || name.includes('батон') || name.includes('лаваш') || name.includes('булк')) return 'bread';
             if (name.includes('чипс') || name.includes('сухар') || name.includes('орех') || name.includes('шоколад') || name.includes('печен')) return 'snack';
-            if (name.includes('рис') || name.includes('греч') || name.includes('макарон') || name.includes('овсян') || name.includes('мук') || name.includes('сахар') || name.includes('сол')) return 'grain';
+            if (name.includes('рис') || name.includes('греч') || name.includes('макарон') || name.includes('овсян') || name.includes('мук') || name.includes('сахар')) return 'grain';
             return 'veg';
+        }
+
+        function parseSubcat(item) {
+            if (['beef', 'pork', 'chicken', 'mince', 'fish'].includes(item.icon)) return 'meat';
+            if (['milk', 'eggs', 'cheese', 'butter'].includes(item.icon)) return 'dairy';
+            if (['veg'].includes(item.icon)) return 'produce';
+            if (['ketchup', 'spice', 'grain'].includes(item.icon)) return 'pantry';
+            if (['drink'].includes(item.icon)) return 'drinks';
+            return 'other';
         }
 
         function renderArt(artKey) {
@@ -955,11 +1024,14 @@
 
         function normalizeItem(raw) {
             const isVirtualDefault = Number(raw.id) < -100;
+            const resolvedArt = raw.icon && SVG_ART[raw.icon]
+                ? raw.icon
+                : (raw.art && SVG_ART[raw.art] ? raw.art : detectArtByName(raw.name));
             return {
                 id: raw.id,
                 isNew: Boolean(raw.isNew || isVirtualDefault),
                 name: capitalizeFirst(raw.name || 'Без названия'),
-                icon: raw.icon || raw.art || detectArtByName(raw.name),
+                icon: resolvedArt,
                 amount: Number(raw.amount) || 0,
                 unit: raw.unit || 'шт',
                 status: raw.status || 'catalog',
@@ -1131,6 +1203,15 @@
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.tab === tab);
             });
+            document.getElementById('subcats').classList.toggle('visible', tab === 'catalog');
+            render();
+        }
+
+        function setSubcat(sub) {
+            currentSubcat = sub;
+            document.querySelectorAll('.subcat-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.sub === sub);
+            });
             render();
         }
 
@@ -1178,6 +1259,7 @@
             const items = draftItems.filter(item => {
                 if (currentTab === 'in_stock' && item.status !== 'in_stock') return false;
                 if (currentTab === 'to_buy' && item.status !== 'to_buy') return false;
+                if (currentTab === 'catalog' && currentSubcat !== 'all' && parseSubcat(item) !== currentSubcat) return false;
                 if (searchQuery && !item.name.toLowerCase().includes(searchQuery)) return false;
                 return true;
             });
@@ -1403,6 +1485,7 @@
             };
 
             let syncedOk = true;
+            let lastErrReason = '';
 
             try {
                 for (const id of deletedIds) {
@@ -1411,7 +1494,10 @@
                             method: 'DELETE',
                             headers
                         });
-                        if (!delRes.ok) syncedOk = false;
+                        if (!delRes.ok) {
+                            syncedOk = false;
+                            lastErrReason = `DELETE ${delRes.status}`;
+                        }
                     }
                 }
 
@@ -1442,6 +1528,7 @@
                             }
                         } else {
                             syncedOk = false;
+                            lastErrReason = `POST ${postRes.status}`;
                         }
                     } else {
                         const patchRes = await fetch(`${SUPABASE_URL}/rest/v1/fridge_items?id=eq.${item.id}`, {
@@ -1449,7 +1536,10 @@
                             headers,
                             body: JSON.stringify(payload)
                         });
-                        if (!patchRes.ok) syncedOk = false;
+                        if (!patchRes.ok) {
+                            syncedOk = false;
+                            lastErrReason = `PATCH ${patchRes.status}`;
+                        }
                     }
                 }
 
@@ -1460,10 +1550,10 @@
                     clearAllToasts();
                     setUnsaved(false);
                 } else {
-                    setUnsaved(true, 'Сохранено локально (ошибка сети)');
+                    setUnsaved(true, `Только локально (${lastErrReason || 'ошибка БД'})`);
                 }
             } catch (e) {
-                setUnsaved(true, 'Сохранено локально (нет связи)');
+                setUnsaved(true, 'Только локально (нет доступа к облаку)');
             } finally {
                 btn.disabled = false;
                 btn.innerText = 'Сохранить';
